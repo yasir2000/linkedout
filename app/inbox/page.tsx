@@ -40,7 +40,7 @@ export default function InboxPage() {
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const response = await fetch('https://api.example.com/messages');
+        const response = await fetch('https://n8n-zjrvqodz.cloud-station.app/webhook/linkout_messages');
         if (!response.ok) throw new Error('Failed to fetch messages');
         const data = await response.json();
         setMessages(data);
