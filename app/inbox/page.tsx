@@ -3,12 +3,14 @@
 import { cn } from "@/lib/utils";
 import { InboxIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
 
 interface Message {
-  id: number;
+  id: string;
   author: string;
   content: string;
   category: string;
+  lastUpdated: string;
 }
 
 function EmptyState() {
@@ -31,86 +33,29 @@ function EmptyState() {
 }
 
 export default function InboxPage() {
-  const messages: Message[] = [
-    {
-      id: 547,
-      author: "Oumnya Benhassou",
-      content: "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim...",
-      category: "category 1"
-    },
-    {
-      id: 235,
-      author: "Maxym Tkacz",
-      content: "Hey Max, I love your content! Mainly because I am you!",
-      category: "simple thanks"
-    },
-    {
-      id: 986,
-      author: "Luis Guzman",
-      content: "Max, WTF are you doing in Dubai? Stop spending my money!",
-      category: "other"
-    },
-    {
-      id: 432,
-      author: "Sarah Chen",
-      content: "Could you review my latest pull request? I've implemented the new feature we discussed in the last meeting.",
-      category: "work"
-    },
-    {
-      id: 876,
-      author: "James Wilson",
-      content: "Thanks for the amazing presentation yesterday! The client was really impressed with the design direction.",
-      category: "feedback"
-    },
-    {
-      id: 345,
-      author: "Elena Rodriguez",
-      content: "Quick question about the API documentation - are we supporting websockets in the new version?",
-      category: "technical"
-    },
-    {
-      id: 654,
-      author: "Ahmed Hassan",
-      content: "The deployment failed on staging. I've attached the error logs. Can you take a look when you have a moment?",
-      category: "urgent"
-    },
-    {
-      id: 234,
-      author: "Marie Dubois",
-      content: "Just wanted to say that the new dashboard design is absolutely fantastic! Great work!",
-      category: "simple thanks"
-    },
-    {
-      id: 789,
-      author: "Thomas Schmidt",
-      content: "We need to schedule a meeting to discuss the Q4 roadmap. When are you available next week?",
-      category: "planning"
-    },
-    {
-      id: 543,
-      author: "Lisa Wong",
-      content: "The client reported a bug in the payment processing module. Priority is high on this one.",
-      category: "urgent"
-    },
-    {
-      id: 321,
-      author: "Alex Morgan",
-      content: "Can we sync up about the new marketing campaign? I have some ideas I'd like to run by you.",
-      category: "marketing"
-    },
-    {
-      id: 765,
-      author: "David Kim",
-      content: "The latest analytics report shows a 25% increase in user engagement. Great news!",
-      category: "analytics"
-    },
-    {
-      id: 890,
-      author: "Emma Thompson",
-      content: "Need your approval on the new brand guidelines before we send them to the client.",
-      category: "design"
-    }
-  ];
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const response = await fetch('https://n8n-zjrvqodz.cloud-station.app/webhook/linkout_messages');
+        if (!response.ok) throw new Error('Failed to fetch messages');
+        const data = await response.json();
+        setMessages(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load messages');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMessages();
+  }, []);
+
+  if (isLoading) return null;
+  if (error) return <div className="text-destructive p-4">{error}</div>;
 
   return (
     <div className="container mx-auto py-6 max-w-4xl">
@@ -135,9 +80,11 @@ export default function InboxPage() {
                     {message.content}
                   </p>
                 </div>
-                <div className="flex-shrink-0 rounded-md bg-muted/10 px-2 py-1 text-xs">
-                  {message.category}
-                </div>
+                {message.category && (
+                  <div className="flex-shrink-0 rounded-md bg-muted/10 px-2 py-1 text-xs">
+                    {message.category}
+                  </div>
+                )}
               </div>
             </div>
           ))}

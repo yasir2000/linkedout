@@ -1,50 +1,25 @@
 {
   "pages": {
-    "/_not-found": [
-      "static/chunks/webpack-97a115c2a97ef13e.js",
-      "static/chunks/fd9d1056-2b1970f18ccfaff8.js",
-      "static/chunks/864-64292332573d2908.js",
-      "static/chunks/main-app-371d7f7c167a70be.js",
-      "static/chunks/app/_not-found-a46be700fe85788d.js"
+    "/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/page.js"
     ],
     "/layout": [
-      "static/chunks/webpack-97a115c2a97ef13e.js",
-      "static/chunks/fd9d1056-2b1970f18ccfaff8.js",
-      "static/chunks/864-64292332573d2908.js",
-      "static/chunks/main-app-371d7f7c167a70be.js",
-      "static/css/2c3bf0a65ff2512b.css",
-      "static/chunks/app/layout-5829345255328d4a.js"
-    ],
-    "/page": [
-      "static/chunks/webpack-97a115c2a97ef13e.js",
-      "static/chunks/fd9d1056-2b1970f18ccfaff8.js",
-      "static/chunks/864-64292332573d2908.js",
-      "static/chunks/main-app-371d7f7c167a70be.js",
-      "static/chunks/app/page-5b5eaa4e02b714c8.js"
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/layout.css",
+      "static/chunks/app/layout.js"
     ],
     "/inbox/page": [
-      "static/chunks/webpack-97a115c2a97ef13e.js",
-      "static/chunks/fd9d1056-2b1970f18ccfaff8.js",
-      "static/chunks/864-64292332573d2908.js",
-      "static/chunks/main-app-371d7f7c167a70be.js",
-      "static/chunks/650-6b7c06a2fb478cb9.js",
-      "static/chunks/app/inbox/page-0067a22d8e85dc7a.js"
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/inbox/page.js"
     ],
     "/inbox/loading": [
-      "static/chunks/webpack-97a115c2a97ef13e.js",
-      "static/chunks/fd9d1056-2b1970f18ccfaff8.js",
-      "static/chunks/864-64292332573d2908.js",
-      "static/chunks/main-app-371d7f7c167a70be.js",
-      "static/chunks/app/inbox/loading-57a4a7d1368bd349.js"
-    ],
-    "/thread/page": [
-      "static/chunks/webpack-97a115c2a97ef13e.js",
-      "static/chunks/fd9d1056-2b1970f18ccfaff8.js",
-      "static/chunks/864-64292332573d2908.js",
-      "static/chunks/main-app-371d7f7c167a70be.js",
-      "static/chunks/650-6b7c06a2fb478cb9.js",
-      "static/chunks/253-343de5d079919841.js",
-      "static/chunks/app/thread/page-e0ad77d25a440889.js"
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/inbox/loading.js"
     ]
   }
 }
