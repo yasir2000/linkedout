@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { InboxIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface Message {
   id: string;
@@ -36,6 +37,7 @@ export default function InboxPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -54,6 +56,10 @@ export default function InboxPage() {
     fetchMessages();
   }, []);
 
+  const handleMessageClick = (messageId: string) => {
+    router.push(`/thread?id=${messageId}`);
+  };
+
   if (isLoading) return null;
   if (error) return <div className="text-destructive p-4">{error}</div>;
 
@@ -65,6 +71,7 @@ export default function InboxPage() {
           {messages.map((message, index) => (
             <div 
               key={message.id}
+              onClick={() => handleMessageClick(message.id)}
               className={cn(
                 "p-3 hover:bg-muted/10 transition-colors cursor-pointer",
                 "flex items-start gap-4"
