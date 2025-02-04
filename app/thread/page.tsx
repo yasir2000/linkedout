@@ -1,14 +1,33 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
-import { ArrowLeft, Send, User, Wand2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowLeft, Wand2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { format, formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 
-// ... (keep interfaces)
+interface Author {
+  id: string;
+  name: string;
+  followers?: number;
+  linkedinUrl: string;
+  threadUrl: string;
+  avatarUrl?: string;
+}
+
+interface Message {
+  id: string;
+  author: Author;
+  content: string;
+  timestamp: Date;
+}
+
+interface Thread {
+  id: string;
+  messages: Message[];
+}
 
 async function generateDraft(data: {
   toFullName: string;
@@ -55,7 +74,9 @@ function Avatar({ author }: { author: Author }) {
 
   return (
     <div 
-      className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium text-primary-foreground"
+      className={cn(
+        'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium text-primary-foreground'
+      )}
       style={{ backgroundColor }}
     >
       {initials}
@@ -97,10 +118,16 @@ function stringToColor(str: string): string {
 export default function ThreadPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const threadId = searchParams.get('id');
   const [reply, setReply] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const threadId = searchParams?.get('id');
 
   // Mock thread data
   const thread: Thread = {
@@ -161,16 +188,24 @@ export default function ThreadPage() {
 
     setIsSending(true);
     try {
-      // This would be replaced with actual API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       setReply('');
-      // Optionally update thread with new message
     } catch (error) {
       console.error('Failed to send message:', error);
     } finally {
       setIsSending(false);
     }
   };
+
+  const handleOpenLink = (url: string) => {
+    if (typeof window !== 'undefined') {
+      window.open(url, '_blank');
+    }
+  };
+
+  if (!mounted) {
+    return null;
+  }
 
   if (!threadId || !thread) {
     router.push('/inbox');
@@ -205,13 +240,13 @@ export default function ThreadPage() {
           <div className="flex items-center gap-2">
             <Button 
               variant="outline"
-              onClick={() => window.open(firstMessage.author.linkedinUrl, '_blank')}
+              onClick={() => handleOpenLink(firstMessage.author.linkedinUrl)}
             >
               LinkedIn Profile
             </Button>
             <Button 
               variant="outline"
-              onClick={() => window.open(firstMessage.author.threadUrl, '_blank')}
+              onClick={() => handleOpenLink(firstMessage.author.threadUrl)}
             >
               Open Thread
             </Button>
