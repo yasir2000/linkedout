@@ -457,6 +457,57 @@ video {
 [hidden] {
   display: none;
 }
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 150 5% 8%;
+    --foreground: 150 5% 97%;
+    --card: 150 5% 8%;
+    --card-foreground: 150 5% 97%;
+    --popover: 150 5% 8%;
+    --popover-foreground: 150 5% 97%;
+    --primary: 150 5% 97%;
+    --primary-foreground: 150 5% 8%;
+    --secondary: 150 5% 16%;
+    --secondary-foreground: 150 5% 97%;
+    --muted: 150 5% 12%;
+    --muted-foreground: 150 5% 65%;
+    --accent: 150 5% 12%;
+    --accent-foreground: 150 5% 97%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 150 5% 97%;
+    --border: 150 5% 14%;
+    --input: 150 5% 14%;
+    --ring: 150 5% 83%;
+  }
+  * {
+  border-color: hsl(var(--border));
+}
+  body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
 
 *, ::before, ::after {
   --tw-border-spacing-x: 0;
@@ -855,6 +906,9 @@ video {
 .max-h-screen {
   max-height: 100vh;
 }
+.min-h-\[100px\] {
+  min-height: 100px;
+}
 .min-h-\[80px\] {
   min-height: 80px;
 }
@@ -1136,9 +1190,6 @@ video {
 .divide-border > :not([hidden]) ~ :not([hidden]) {
   border-color: hsl(var(--border));
 }
-.self-end {
-  align-self: flex-end;
-}
 .overflow-auto {
   overflow: auto;
 }
@@ -1183,6 +1234,9 @@ video {
 .rounded-sm {
   border-radius: calc(var(--radius) - 4px);
 }
+.rounded-xl {
+  border-radius: 0.75rem;
+}
 .rounded-t-\[10px\] {
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
@@ -1192,6 +1246,9 @@ video {
 }
 .border {
   border-width: 1px;
+}
+.border-0 {
+  border-width: 0px;
 }
 .border-2 {
   border-width: 2px;
@@ -1384,9 +1441,6 @@ video {
 .pb-4 {
   padding-bottom: 1rem;
 }
-.pl-10 {
-  padding-left: 2.5rem;
-}
 .pl-2 {
   padding-left: 0.5rem;
 }
@@ -1405,6 +1459,9 @@ video {
 .pr-2\.5 {
   padding-right: 0.625rem;
 }
+.pr-28 {
+  padding-right: 7rem;
+}
 .pr-8 {
   padding-right: 2rem;
 }
@@ -1419,6 +1476,9 @@ video {
 }
 .pt-4 {
   padding-top: 1rem;
+}
+.pl-10 {
+  padding-left: 2.5rem;
 }
 .text-left {
   text-align: left;
@@ -1447,13 +1507,13 @@ video {
   font-size: 0.875rem;
   line-height: 1.25rem;
 }
-.text-xl {
-  font-size: 1.25rem;
-  line-height: 1.75rem;
-}
 .text-xs {
   font-size: 0.75rem;
   line-height: 1rem;
+}
+.text-xl {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
 }
 .font-bold {
   font-weight: 700;
@@ -1518,6 +1578,10 @@ video {
 }
 .underline-offset-4 {
   text-underline-offset: 4px;
+}
+.antialiased {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 .opacity-0 {
   opacity: 0;
@@ -1658,60 +1722,6 @@ video {
   animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-:root {
-  --background: 0 0% 100%;
-  --foreground: 0 0% 3.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 0 0% 3.9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 3.9%;
-  --primary: 0 0% 9%;
-  --primary-foreground: 0 0% 98%;
-  --secondary: 0 0% 96.1%;
-  --secondary-foreground: 0 0% 9%;
-  --muted: 0 0% 96.1%;
-  --muted-foreground: 0 0% 45.1%;
-  --accent: 0 0% 96.1%;
-  --accent-foreground: 0 0% 9%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 89.8%;
-  --input: 0 0% 89.8%;
-  --ring: 0 0% 3.9%;
-  --radius: 0.5rem;
-}
-
-.dark {
-  --background: 150 5% 8%;
-  --foreground: 150 5% 97%;
-  --card: 150 5% 8%;
-  --card-foreground: 150 5% 97%;
-  --popover: 150 5% 8%;
-  --popover-foreground: 150 5% 97%;
-  --primary: 150 5% 97%;
-  --primary-foreground: 150 5% 8%;
-  --secondary: 150 5% 16%;
-  --secondary-foreground: 150 5% 97%;
-  --muted: 150 5% 12%;
-  --muted-foreground: 150 5% 65%;
-  --accent: 150 5% 12%;
-  --accent-foreground: 150 5% 97%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 150 5% 97%;
-  --border: 150 5% 14%;
-  --input: 150 5% 14%;
-  --ring: 150 5% 83%;
-}
-
-* {
-  border-color: hsl(var(--border));
-}
-
-body {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
-}
-
 .file\:border-0::file-selector-button {
   border-width: 0px;
 }
@@ -1814,6 +1824,10 @@ body {
   background-color: hsl(var(--muted) / 0.5);
 }
 
+.hover\:bg-muted\/80:hover {
+  background-color: hsl(var(--muted) / 0.8);
+}
+
 .hover\:bg-primary:hover {
   background-color: hsl(var(--primary));
 }
@@ -1832,6 +1846,10 @@ body {
 
 .hover\:bg-secondary\/80:hover {
   background-color: hsl(var(--secondary) / 0.8);
+}
+
+.hover\:bg-transparent:hover {
+  background-color: transparent;
 }
 
 .hover\:text-accent-foreground:hover {
@@ -1900,6 +1918,12 @@ body {
 .focus-visible\:outline-none:focus-visible {
   outline: 2px solid transparent;
   outline-offset: 2px;
+}
+
+.focus-visible\:ring-0:focus-visible {
+  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
 }
 
 .focus-visible\:ring-1:focus-visible {
