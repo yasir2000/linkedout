@@ -39,16 +39,27 @@ function EmptyState() {
 function MessageGroup({ message }: { message: Message }) {
   const initial = message.author ? message.author[0]?.toUpperCase() : '?';
   const date = message.lastUpdated ? new Date(message.lastUpdated) : new Date();
+  
+  console.log('Message data:', {
+    id: message.id,
+    author: message.author,
+    hasAvatar: !!message.avatar,
+    avatarUrl: message.avatar
+  });
 
   return (
     <div className="flex gap-6">
       <div className="flex-shrink-0">
         {message.avatar ? (
           <img 
-            src={message.avatar}
+            src={message.avatar || ''}
             alt={message.author}
             className="w-14 h-14 rounded-full border-2 border-border object-cover"
             onError={(e) => {
+              console.error('Image load error:', {
+                src: e.currentTarget.src,
+                error: e
+              });
               e.currentTarget.onerror = null;
               e.currentTarget.style.display = 'none';
               e.currentTarget.parentElement!.innerHTML = `
@@ -104,19 +115,13 @@ export default function InboxPage() {
         
         if (!response.ok) throw new Error('Failed to fetch messages');
         const data = await response.json();
-        console.log('Raw API Response:', data);
+        
+        console.log('API Base URL:', process.env.NEXT_PUBLIC_API_BASE_URL);
+        console.log('Full message data:', data);
 
-        // The data is already an array of messages
-        setMessages(data.filter((msg: Message) => ({
-          ...msg,
-          avatar: msg.avatar // Make sure to include the avatar in the filtered data
-        })));
+        setMessages(data.filter((msg: Message) => msg.content !== null));
       } catch (err) {
-        console.error('Detailed fetch error:', {
-          error: err,
-          message: err instanceof Error ? err.message : 'Unknown error',
-          stack: err instanceof Error ? err.stack : undefined
-        });
+        console.error('Detailed fetch error:', err);
         setError(err instanceof Error ? err.message : 'Failed to load messages');
       } finally {
         setIsLoading(false);
