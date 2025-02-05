@@ -35,7 +35,7 @@ async function generateDraft(data: {
   messageCategory: string;
 }): Promise<{ draftReply: string }> {
   try {
-    const response = await fetch('https://n8n-zjrvqodz.cloud-station.app/webhook/linkedout/generate-draft', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/linkedout/generate-draft`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -122,51 +122,63 @@ export default function ThreadPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [thread, setThread] = useState<Thread | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const threadId = searchParams?.get('id');
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const threadId = searchParams?.get('id');
+  useEffect(() => {
+    if (!threadId) return;
 
-  // Mock thread data
-  const thread: Thread = {
-    id: '1234',
-    messages: [
-      {
-        id: '1',
-        author: {
-          id: '1',
-          name: 'Maxym Tkacz',
-          followers: 3500,
-          linkedinUrl: 'https://linkedin.com/in/maxymtkacz',
-          threadUrl: '#'
-        },
-        content: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-        timestamp: new Date(2025, 1, 12, 11, 56)
-      },
-      {
-        id: '2',
-        author: {
-          id: '2',
-          name: 'Luis Guzman',
-          linkedinUrl: 'https://linkedin.com/in/luisguzman',
-          threadUrl: '#'
-        },
-        content: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\nUt enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-        timestamp: new Date(2025, 1, 12, 11, 58)
+    const fetchThread = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/linkedout/thread/${threadId}`);
+        if (!response.ok) throw new Error('Failed to fetch thread');
+        const data = await response.json();
+        
+        // Transform the API response into our Thread type
+        const transformedThread: Thread = {
+          id: threadId,
+          messages: data.messages.map((msg: any) => ({
+            id: msg.id,
+            author: {
+              id: msg.author.id,
+              name: msg.author.name,
+              followers: msg.author.followers,
+              linkedinUrl: msg.author.linkedinUrl,
+              threadUrl: msg.author.threadUrl,
+              avatarUrl: msg.author.avatarUrl
+            },
+            content: msg.content,
+            timestamp: new Date(msg.timestamp)
+          }))
+        };
+        
+        setThread(transformedThread);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load thread');
+      } finally {
+        setIsLoading(false);
       }
-    ]
-  };
+    };
+
+    fetchThread();
+  }, [threadId]);
 
   const handleGenerateDraft = async () => {
     setIsGenerating(true);
     try {
-      const lastMessage = thread.messages[thread.messages.length - 1];
+      const lastMessage = thread?.messages[thread?.messages.length - 1];
       
       const draftResponse = await generateDraft({
-        toFullName: lastMessage.author.name,
-        messageToReplyTo: lastMessage.content,
+        toFullName: lastMessage?.author.name || '',
+        messageToReplyTo: lastMessage?.content || '',
         messageCategory: 'love-your-content'
       });
       
@@ -207,9 +219,43 @@ export default function ThreadPage() {
     return null;
   }
 
-  if (!threadId || !thread) {
+  if (!threadId) {
     router.push('/inbox');
     return null;
+  }
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto py-6 max-w-4xl">
+        <div className="flex items-center space-x-4">
+          <div className="h-8 w-24 bg-muted/10 animate-pulse rounded" />
+        </div>
+        <div className="mt-4 space-y-4">
+          <div className="h-32 bg-muted/10 animate-pulse rounded-lg" />
+          <div className="h-32 bg-muted/10 animate-pulse rounded-lg" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto py-6 max-w-4xl">
+        <div className="text-destructive p-4 rounded-lg border border-destructive/50">
+          {error}
+        </div>
+      </div>
+    );
+  }
+
+  if (!thread) {
+    return (
+      <div className="container mx-auto py-6 max-w-4xl">
+        <div className="text-muted-foreground p-4 text-center">
+          Thread not found
+        </div>
+      </div>
+    );
   }
 
   const firstMessage = thread.messages[0];
