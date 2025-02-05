@@ -30,15 +30,19 @@ interface Thread {
   messages: Message[];
 }
 
-async function generateDraft(data: {
-  toFullName: string;
-  messageToReplyTo: string;
-  messageCategory: string;
-}): Promise<{ draftReply: string }> {
+async function generateDraft(
+  data: {
+    toFullName: string;
+    messageToReplyTo: string;
+    messageCategory: string;
+  },
+  token: string
+): Promise<{ draftReply: string }> {
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/linkedout/generate-draft`, {
       method: 'POST',
       headers: {
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(data),
@@ -143,6 +147,7 @@ export default function ThreadPage() {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/linkedout/thread/${threadId}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
           },
         });
         if (!response.ok) throw new Error('Failed to fetch thread');
@@ -184,6 +189,8 @@ export default function ThreadPage() {
   }, [token, authLoading, router]);
 
   const handleGenerateDraft = async () => {
+    if (!token) return;
+
     setIsGenerating(true);
     try {
       const lastMessage = thread?.messages[thread?.messages.length - 1];
@@ -192,7 +199,7 @@ export default function ThreadPage() {
         toFullName: lastMessage?.author.name || '',
         messageToReplyTo: lastMessage?.content || '',
         messageCategory: 'love-your-content'
-      });
+      }, token);
       
       setReply(draftResponse.draftReply);
     } finally {
