@@ -27,6 +27,7 @@ interface Message {
   recipientLinkedInFollowerCount: string;
   recipientName: string;
   avatar?: string;
+  chatId?: string;
 }
 
 interface Thread {
@@ -189,7 +190,8 @@ export default function ThreadPage() {
             linkedinProfileURL: msg.linkedinProfileURL,
             recipientLinkedInFollowerCount: msg.recipientLinkedInFollowerCount,
             recipientName: msg.recipientName,
-            avatar: msg.avatar
+            avatar: msg.avatar,
+            chatId: msg.chatId
           }))
           .sort((a: Message, b: Message) => new Date(a.lastUpdated).getTime() - new Date(b.lastUpdated).getTime())
       };
@@ -252,6 +254,7 @@ export default function ThreadPage() {
         body: JSON.stringify({
           content: reply,
           threadId: threadId,
+          chatId: thread?.messages[0]?.chatId,
         }),
       });
 
@@ -277,6 +280,7 @@ export default function ThreadPage() {
           message: reply,
           threadId: threadId,
           messageId: thread?.messages[0]?.id,
+          chatId: thread?.messages[0]?.chatId,
           recipientName: thread?.messages[0]?.recipientName,
           linkedinProfileURL: thread?.messages[0]?.linkedinProfileURL,
         }),
