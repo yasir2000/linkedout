@@ -198,7 +198,7 @@ export default function ThreadPage() {
               recipientName: msg.recipientName,
               avatar: msg.avatar
             }))
-            .sort((a, b) => new Date(a.lastUpdated).getTime() - new Date(b.lastUpdated).getTime()) // Sort by date ascending (oldest first)
+            .sort((a: Message, b: Message) => new Date(a.lastUpdated).getTime() - new Date(b.lastUpdated).getTime()) // Sort by date ascending (oldest first)
         };
         
         setThread(transformedThread);
