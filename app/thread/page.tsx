@@ -10,19 +10,21 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/auth-context';
 
 interface Author {
-  id: string;
+  id?: string;
   name: string;
-  followers?: number;
-  linkedinUrl: string;
-  threadUrl: string;
+  linkedinUrl?: string;
+  threadUrl?: string;
   avatarUrl?: string;
 }
 
 interface Message {
   id: string;
-  author: Author;
   content: string;
-  timestamp: Date;
+  isFromMe: string;
+  lastUpdated: string;
+  linkedinProfileURL: string;
+  recipientLinkedInFollowerCount: string;
+  recipientName: string;
 }
 
 interface Thread {
@@ -90,22 +92,24 @@ function Avatar({ author }: { author: Author }) {
 }
 
 function MessageGroup({ message }: { message: Message }) {
-  const isRecent = Date.now() - message.timestamp.getTime() < 24 * 60 * 60 * 1000;
-  
+  const initial = message.recipientName ? message.recipientName[0]?.toUpperCase() : '?';
+  const date = message.lastUpdated ? new Date(message.lastUpdated) : new Date();
+
   return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-2">
-        <Avatar author={message.author} />
-        <span className="font-semibold">{message.author.name}</span>
+    <div className="flex gap-4">
+      <div className="flex-shrink-0">
+        <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-sm font-medium">
+          {initial}
+        </div>
       </div>
-      <p className="text-muted-foreground pl-10 whitespace-pre-wrap">
-        {message.content}
-      </p>
-      <div className="pl-10 text-sm text-muted-foreground">
-        {isRecent 
-          ? `Sent ${formatDistanceToNow(message.timestamp)} ago`
-          : `Sent ${format(message.timestamp, "HH:mm 'on' dd MMMM, yyyy")}`
-        }
+      <div className="flex-grow space-y-1">
+        <div className="flex items-center gap-2">
+          <span className="font-medium">{message.recipientName || 'Unknown'}</span>
+          <span className="text-xs text-muted-foreground">
+            {formatDistanceToNow(date, { addSuffix: true })}
+          </span>
+        </div>
+        <p className="text-sm">{message.content || ''}</p>
       </div>
     </div>
   );
@@ -144,7 +148,7 @@ export default function ThreadPage() {
     const fetchThread = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/linkedout/thread/${threadId}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/threads?id=${threadId}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -152,27 +156,25 @@ export default function ThreadPage() {
         });
         if (!response.ok) throw new Error('Failed to fetch thread');
         const data = await response.json();
+        console.log('Thread data:', data);
         
         // Transform the API response into our Thread type
         const transformedThread: Thread = {
           id: threadId,
-          messages: data.messages.map((msg: any) => ({
-            id: msg.id,
-            author: {
-              id: msg.author.id,
-              name: msg.author.name,
-              followers: msg.author.followers,
-              linkedinUrl: msg.author.linkedinUrl,
-              threadUrl: msg.author.threadUrl,
-              avatarUrl: msg.author.avatarUrl
-            },
-            content: msg.content,
-            timestamp: new Date(msg.timestamp)
-          }))
+          messages: [{
+            id: data[0].id,
+            content: data[0].content,
+            isFromMe: data[0].isFromMe,
+            lastUpdated: data[0].lastUpdated,
+            linkedinProfileURL: data[0].linkedinProfileURL,
+            recipientLinkedInFollowerCount: data[0].recipientLinkedInFollowerCount,
+            recipientName: data[0].recipientName
+          }]
         };
         
         setThread(transformedThread);
       } catch (err) {
+        console.error('Thread fetch error:', err);
         setError(err instanceof Error ? err.message : 'Failed to load thread');
       } finally {
         setIsLoading(false);
@@ -196,7 +198,7 @@ export default function ThreadPage() {
       const lastMessage = thread?.messages[thread?.messages.length - 1];
       
       const draftResponse = await generateDraft({
-        toFullName: lastMessage?.author.name || '',
+        toFullName: lastMessage?.recipientName || '',
         messageToReplyTo: lastMessage?.content || '',
         messageCategory: 'love-your-content'
       }, token);
@@ -279,6 +281,16 @@ export default function ThreadPage() {
 
   const firstMessage = thread.messages[0];
 
+  if (!firstMessage) {
+    return (
+      <div className="container mx-auto py-6 max-w-4xl">
+        <div className="text-muted-foreground p-4 text-center">
+          No messages in thread
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto py-6 max-w-4xl">
       <div className="flex items-center justify-between mb-4">
@@ -295,26 +307,20 @@ export default function ThreadPage() {
       <div className="border border-border rounded-lg bg-background">
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div className="flex items-center gap-3">
-            <h2 className="text-xl font-semibold">{firstMessage.author.name}</h2>
-            {firstMessage.author.followers && (
-              <span className="px-2 py-1 text-sm bg-secondary rounded-md">
-                {(firstMessage.author.followers / 1000).toFixed(1)}k
-              </span>
-            )}
+            <h2 className="text-xl font-semibold">{firstMessage.recipientName || 'Unknown'}</h2>
+            <span className="px-2 py-1 text-sm bg-secondary rounded-md">
+              {firstMessage.recipientLinkedInFollowerCount} followers
+            </span>
           </div>
           <div className="flex items-center gap-2">
-            <Button 
-              variant="outline"
-              onClick={() => handleOpenLink(firstMessage.author.linkedinUrl)}
-            >
-              LinkedIn Profile
-            </Button>
-            <Button 
-              variant="outline"
-              onClick={() => handleOpenLink(firstMessage.author.threadUrl)}
-            >
-              Open Thread
-            </Button>
+            {firstMessage.linkedinProfileURL && (
+              <Button 
+                variant="outline"
+                onClick={() => handleOpenLink(firstMessage.linkedinProfileURL)}
+              >
+                LinkedIn Profile
+              </Button>
+            )}
           </div>
         </div>
 
