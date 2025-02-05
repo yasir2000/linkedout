@@ -102,7 +102,7 @@ function MessageGroup({ message }: { message: Message }) {
       <div className="flex-shrink-0">
         {isMe ? (
           <div className={cn(
-            "w-10 h-10 rounded-full flex items-center justify-center text-base font-medium border-2",
+            "w-14 h-14 rounded-full flex items-center justify-center text-xl font-medium border-2",
             "bg-primary text-primary-foreground border-primary"
           )}>
             Me
@@ -111,13 +111,12 @@ function MessageGroup({ message }: { message: Message }) {
           <img 
             src={message.avatar || ''}
             alt={message.recipientName}
-            className="w-10 h-10 rounded-full border-2 border-border object-cover"
+            className="w-14 h-14 rounded-full border-2 border-border object-cover"
             onError={(e) => {
-              // Fallback to initials if image fails to load
               e.currentTarget.onerror = null;
               e.currentTarget.style.display = 'none';
               e.currentTarget.parentElement!.innerHTML = `
-                <div class="w-10 h-10 rounded-full flex items-center justify-center text-base font-medium border-2 bg-background text-foreground border-border">
+                <div class="w-14 h-14 rounded-full flex items-center justify-center text-xl font-medium border-2 bg-background text-foreground border-border">
                   ${initial}
                 </div>
               `;
@@ -127,7 +126,7 @@ function MessageGroup({ message }: { message: Message }) {
       </div>
       <div className="flex-grow space-y-1">
         <div className="flex items-center gap-2">
-          <span className="font-semibold">
+          <span className="font-semibold text-lg">
             {isMe ? "You" : message.recipientName || 'Unknown'}
           </span>
           <span className="text-sm text-muted-foreground">
@@ -337,26 +336,20 @@ export default function ThreadPage() {
       <div className="border border-border rounded-lg bg-background">
         <div className="flex items-center justify-between p-6 border-b border-border">
           <div className="flex items-center gap-4">
-            {firstMessage.isFromMe === "true" ? (
-              <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground border-4 border-primary flex items-center justify-center text-2xl font-medium">
-                Me
-              </div>
-            ) : (
-              <img 
-                src={firstMessage.avatar || ''}
-                alt={firstMessage.recipientName}
-                className="w-16 h-16 rounded-full border-4 border-border object-cover"
-                onError={(e) => {
-                  e.currentTarget.onerror = null;
-                  e.currentTarget.style.display = 'none';
-                  e.currentTarget.parentElement!.innerHTML = `
-                    <div class="w-16 h-16 rounded-full bg-secondary flex items-center justify-center text-2xl font-medium">
-                      ${firstMessage.recipientName?.[0]?.toUpperCase()}
-                    </div>
-                  `;
-                }}
-              />
-            )}
+            <img 
+              src={firstMessage.avatar || ''}
+              alt={firstMessage.recipientName}
+              className="w-16 h-16 rounded-full border-4 border-border object-cover"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.parentElement!.innerHTML = `
+                  <div class="w-16 h-16 rounded-full bg-secondary flex items-center justify-center text-2xl font-medium">
+                    ${firstMessage.recipientName?.[0]?.toUpperCase()}
+                  </div>
+                `;
+              }}
+            />
             <div>
               <h2 className="text-xl font-semibold">{firstMessage.recipientName || 'Unknown'}</h2>
               <div className="text-sm text-muted-foreground flex items-center gap-2">

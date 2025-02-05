@@ -41,25 +41,25 @@ function MessageGroup({ message }: { message: Message }) {
   const date = message.lastUpdated ? new Date(message.lastUpdated) : new Date();
 
   return (
-    <div className="flex gap-4">
+    <div className="flex gap-6">
       <div className="flex-shrink-0">
         {message.avatar ? (
           <img 
             src={message.avatar}
             alt={message.author}
-            className="w-10 h-10 rounded-full border-2 border-border object-cover"
+            className="w-14 h-14 rounded-full border-2 border-border object-cover"
             onError={(e) => {
               e.currentTarget.onerror = null;
               e.currentTarget.style.display = 'none';
               e.currentTarget.parentElement!.innerHTML = `
-                <div class="w-10 h-10 rounded-full flex items-center justify-center text-base font-medium border-2 bg-background text-foreground border-border">
+                <div class="w-14 h-14 rounded-full flex items-center justify-center text-xl font-medium border-2 bg-background text-foreground border-border">
                   ${initial}
                 </div>
               `;
             }}
           />
         ) : (
-          <div className="w-10 h-10 rounded-full flex items-center justify-center text-base font-medium border-2 bg-background text-foreground border-border">
+          <div className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-medium border-2 bg-background text-foreground border-border">
             {initial}
           </div>
         )}
@@ -67,12 +67,12 @@ function MessageGroup({ message }: { message: Message }) {
       <div className="flex-grow min-w-0 flex items-start justify-between gap-4">
         <div className="min-w-0 flex-grow">
           <div className="flex items-center gap-2">
-            <h2 className="font-semibold truncate">{message.author}</h2>
-            <span className="text-xs text-muted-foreground">
+            <h2 className="font-semibold text-lg truncate">{message.author}</h2>
+            <span className="text-sm text-muted-foreground">
               {formatDistanceToNow(date, { addSuffix: true })}
             </span>
           </div>
-          <p className="text-sm text-muted-foreground line-clamp-1">
+          <p className="text-base text-muted-foreground line-clamp-1">
             {message.content}
           </p>
         </div>
@@ -147,7 +147,7 @@ export default function InboxPage() {
 
   return (
     <div className="container mx-auto py-6 max-w-4xl">
-      <h1 className="text-2xl font-bold mb-4">Messages</h1>
+      <h1 className="text-2xl font-bold mb-6">Messages</h1>
       {messages.length > 0 ? (
         <div className="border border-border rounded-lg divide-y divide-border">
           {messages.map((message, index) => (
@@ -155,7 +155,7 @@ export default function InboxPage() {
               key={message.id}
               onClick={() => handleMessageClick(message.id)}
               className={cn(
-                "p-3 hover:bg-muted/10 transition-colors cursor-pointer",
+                "p-4 hover:bg-muted/10 transition-colors cursor-pointer",
                 "flex items-start gap-4"
               )}
             >
