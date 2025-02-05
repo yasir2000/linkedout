@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { format, formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/auth-context';
+import { useToast } from '@/hooks/use-toast';
 
 interface Author {
   id?: string;
@@ -161,8 +162,46 @@ export default function ThreadPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { token, isLoading: authLoading } = useAuth();
+  const { toast } = useToast();
 
   const threadId = searchParams?.get('id');
+
+  const fetchThread = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/threads?id=${threadId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) throw new Error('Failed to fetch thread');
+      const data = await response.json();
+      
+      const transformedThread: Thread = {
+        id: threadId!,
+        messages: data
+          .map((msg: any) => ({
+            id: msg.id || threadId,
+            content: msg.content,
+            isFromMe: msg.isFromMe,
+            lastUpdated: msg.lastUpdated,
+            linkedinProfileURL: msg.linkedinProfileURL,
+            recipientLinkedInFollowerCount: msg.recipientLinkedInFollowerCount,
+            recipientName: msg.recipientName,
+            avatar: msg.avatar
+          }))
+          .sort((a: Message, b: Message) => new Date(a.lastUpdated).getTime() - new Date(b.lastUpdated).getTime())
+      };
+      
+      setThread(transformedThread);
+    } catch (err) {
+      console.error('Thread fetch error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load thread');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -170,46 +209,6 @@ export default function ThreadPage() {
 
   useEffect(() => {
     if (!threadId || !token) return;
-
-    const fetchThread = async () => {
-      setIsLoading(true);
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/threads?id=${threadId}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
-        if (!response.ok) throw new Error('Failed to fetch thread');
-        const data = await response.json();
-        console.log('Thread data:', data);
-        
-        // Transform the API response into our Thread type
-        const transformedThread: Thread = {
-          id: threadId,
-          messages: data
-            .map((msg: any) => ({
-              id: msg.id || threadId,
-              content: msg.content,
-              isFromMe: msg.isFromMe,
-              lastUpdated: msg.lastUpdated,
-              linkedinProfileURL: msg.linkedinProfileURL,
-              recipientLinkedInFollowerCount: msg.recipientLinkedInFollowerCount,
-              recipientName: msg.recipientName,
-              avatar: msg.avatar
-            }))
-            .sort((a: Message, b: Message) => new Date(a.lastUpdated).getTime() - new Date(b.lastUpdated).getTime()) // Sort by date ascending (oldest first)
-        };
-        
-        setThread(transformedThread);
-      } catch (err) {
-        console.error('Thread fetch error:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load thread');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchThread();
   }, [threadId, token]);
 
@@ -238,24 +237,87 @@ export default function ThreadPage() {
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
-
   const handleSend = async () => {
     if (!reply.trim() || isSending) return;
 
     setIsSending(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // First, send to your API
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/messages`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content: reply,
+          threadId: threadId,
+        }),
+      });
+
+      console.log('Message API Response:', {
+        status: response.status,
+        statusText: response.statusText
+      });
+
+      const responseText = await response.text();
+      console.log('Message API Response Text:', responseText);
+
+      if (!response.ok) {
+        throw new Error(`Failed to save message: ${response.status} ${responseText}`);
+      }
+
+      // Then trigger the n8n workflow
+      const n8nResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/linkedout/message`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: reply,
+          threadId: threadId,
+          messageId: thread?.messages[0]?.id,
+          recipientName: thread?.messages[0]?.recipientName,
+          linkedinProfileURL: thread?.messages[0]?.linkedinProfileURL,
+        }),
+      });
+
+      console.log('N8N Response:', {
+        status: n8nResponse.status,
+        statusText: n8nResponse.statusText
+      });
+
+      const n8nResponseText = await n8nResponse.text();
+      console.log('N8N Response Text:', n8nResponseText);
+
+      if (!n8nResponse.ok) {
+        throw new Error(`Failed to trigger workflow: ${n8nResponse.status} ${n8nResponseText}`);
+      }
+
       setReply('');
+      fetchThread();
+      
+      toast({
+        title: "Message sent",
+        description: "Your message has been sent successfully.",
+      });
+
     } catch (error) {
-      console.error('Failed to send message:', error);
+      console.error('Detailed send error:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to send message",
+        variant: "destructive",
+      });
     } finally {
       setIsSending(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
     }
   };
 
