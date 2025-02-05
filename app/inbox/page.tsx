@@ -5,6 +5,7 @@ import { InboxIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from '@/contexts/auth-context';
 
 interface Message {
   id: string;
@@ -38,11 +39,16 @@ export default function InboxPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const { token, isLoading: authLoading } = useAuth();
 
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/linkout_messages`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/linkout_messages`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
         if (!response.ok) throw new Error('Failed to fetch messages');
         const data = await response.json();
         setMessages(data);
@@ -53,14 +59,24 @@ export default function InboxPage() {
       }
     };
 
-    fetchMessages();
-  }, []);
+    if (token) {
+      fetchMessages();
+    }
+  }, [token]);
+
+  useEffect(() => {
+    if (!authLoading && !token) {
+      router.push('/login');
+    }
+  }, [token, authLoading, router]);
 
   const handleMessageClick = (messageId: string) => {
     router.push(`/thread?id=${messageId}`);
   };
 
-  if (isLoading) return null;
+  if (isLoading || authLoading || !token) {
+    return null;
+  }
   if (error) return <div className="text-destructive p-4">{error}</div>;
 
   return (

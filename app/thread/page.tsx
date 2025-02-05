@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { format, formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/auth-context';
 
 interface Author {
   id: string;
@@ -125,6 +126,7 @@ export default function ThreadPage() {
   const [thread, setThread] = useState<Thread | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { token, isLoading: authLoading } = useAuth();
 
   const threadId = searchParams?.get('id');
 
@@ -133,12 +135,16 @@ export default function ThreadPage() {
   }, []);
 
   useEffect(() => {
-    if (!threadId) return;
+    if (!threadId || !token) return;
 
     const fetchThread = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/linkedout/thread/${threadId}`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/linkedout/thread/${threadId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
         if (!response.ok) throw new Error('Failed to fetch thread');
         const data = await response.json();
         
@@ -169,7 +175,13 @@ export default function ThreadPage() {
     };
 
     fetchThread();
-  }, [threadId]);
+  }, [threadId, token]);
+
+  useEffect(() => {
+    if (!authLoading && !token) {
+      router.push('/login');
+    }
+  }, [token, authLoading, router]);
 
   const handleGenerateDraft = async () => {
     setIsGenerating(true);
@@ -224,7 +236,7 @@ export default function ThreadPage() {
     return null;
   }
 
-  if (isLoading) {
+  if (isLoading || authLoading) {
     return (
       <div className="container mx-auto py-6 max-w-4xl">
         <div className="flex items-center space-x-4">
