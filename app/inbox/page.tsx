@@ -14,6 +14,7 @@ interface Message {
   content: string | null;
   lastUpdated: string;
   category: string | null;
+  avatar?: string;
 }
 
 function EmptyState() {
@@ -30,6 +31,51 @@ function EmptyState() {
         <Button variant="outline" onClick={() => window.location.reload()}>
           Refresh
         </Button>
+      </div>
+    </div>
+  );
+}
+
+function MessageGroup({ message }: { message: Message }) {
+  const initial = message.author ? message.author[0]?.toUpperCase() : '?';
+  const date = message.lastUpdated ? new Date(message.lastUpdated) : new Date();
+
+  return (
+    <div className="flex gap-4">
+      <div className="flex-shrink-0">
+        {message.avatar ? (
+          <img 
+            src={message.avatar}
+            alt={message.author}
+            className="w-10 h-10 rounded-full border-2 border-border object-cover"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.style.display = 'none';
+              e.currentTarget.parentElement!.innerHTML = `
+                <div class="w-10 h-10 rounded-full flex items-center justify-center text-base font-medium border-2 bg-background text-foreground border-border">
+                  ${initial}
+                </div>
+              `;
+            }}
+          />
+        ) : (
+          <div className="w-10 h-10 rounded-full flex items-center justify-center text-base font-medium border-2 bg-background text-foreground border-border">
+            {initial}
+          </div>
+        )}
+      </div>
+      <div className="flex-grow min-w-0 flex items-start justify-between gap-4">
+        <div className="min-w-0 flex-grow">
+          <div className="flex items-center gap-2">
+            <h2 className="font-semibold truncate">{message.author}</h2>
+            <span className="text-xs text-muted-foreground">
+              {formatDistanceToNow(date, { addSuffix: true })}
+            </span>
+          </div>
+          <p className="text-sm text-muted-foreground line-clamp-1">
+            {message.content}
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -61,7 +107,10 @@ export default function InboxPage() {
         console.log('Raw API Response:', data);
 
         // The data is already an array of messages
-        setMessages(data.filter((msg: Message) => msg.content !== null));
+        setMessages(data.filter((msg: Message) => ({
+          ...msg,
+          avatar: msg.avatar // Make sure to include the avatar in the filtered data
+        })));
       } catch (err) {
         console.error('Detailed fetch error:', {
           error: err,
@@ -110,22 +159,7 @@ export default function InboxPage() {
                 "flex items-start gap-4"
               )}
             >
-              <div className="flex-shrink-0 w-7 h-7 rounded-full bg-secondary flex items-center justify-center text-sm font-medium">
-                {index + 1}
-              </div>
-              <div className="flex-grow min-w-0 flex items-start justify-between gap-4">
-                <div className="min-w-0 flex-grow">
-                  <div className="flex items-center gap-2">
-                    <h2 className="font-semibold truncate">{message.author}</h2>
-                    <span className="text-xs text-muted-foreground">
-                      {formatDistanceToNow(new Date(message.lastUpdated), { addSuffix: true })}
-                    </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground line-clamp-1">
-                    {message.content}
-                  </p>
-                </div>
-              </div>
+              <MessageGroup message={message} />
             </div>
           ))}
         </div>

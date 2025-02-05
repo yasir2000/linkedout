@@ -25,6 +25,7 @@ interface Message {
   linkedinProfileURL: string;
   recipientLinkedInFollowerCount: string;
   recipientName: string;
+  avatar?: string;
 }
 
 interface Thread {
@@ -92,24 +93,50 @@ function Avatar({ author }: { author: Author }) {
 }
 
 function MessageGroup({ message }: { message: Message }) {
+  const isMe = message.isFromMe === "true";
   const initial = message.recipientName ? message.recipientName[0]?.toUpperCase() : '?';
   const date = message.lastUpdated ? new Date(message.lastUpdated) : new Date();
 
   return (
-    <div className="flex gap-4">
+    <div className="flex gap-4 mb-8">
       <div className="flex-shrink-0">
-        <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-sm font-medium">
-          {initial}
-        </div>
+        {isMe ? (
+          <div className={cn(
+            "w-10 h-10 rounded-full flex items-center justify-center text-base font-medium border-2",
+            "bg-primary text-primary-foreground border-primary"
+          )}>
+            Me
+          </div>
+        ) : (
+          <img 
+            src={message.avatar || ''}
+            alt={message.recipientName}
+            className="w-10 h-10 rounded-full border-2 border-border object-cover"
+            onError={(e) => {
+              // Fallback to initials if image fails to load
+              e.currentTarget.onerror = null;
+              e.currentTarget.style.display = 'none';
+              e.currentTarget.parentElement!.innerHTML = `
+                <div class="w-10 h-10 rounded-full flex items-center justify-center text-base font-medium border-2 bg-background text-foreground border-border">
+                  ${initial}
+                </div>
+              `;
+            }}
+          />
+        )}
       </div>
       <div className="flex-grow space-y-1">
         <div className="flex items-center gap-2">
-          <span className="font-medium">{message.recipientName || 'Unknown'}</span>
-          <span className="text-xs text-muted-foreground">
-            {formatDistanceToNow(date, { addSuffix: true })}
+          <span className="font-semibold">
+            {isMe ? "You" : message.recipientName || 'Unknown'}
+          </span>
+          <span className="text-sm text-muted-foreground">
+            {format(date, "MMM d, yyyy 'at' h:mm a")}
           </span>
         </div>
-        <p className="text-sm">{message.content || ''}</p>
+        <p className="text-base text-muted-foreground whitespace-pre-wrap">
+          {message.content || ''}
+        </p>
       </div>
     </div>
   );
@@ -161,15 +188,18 @@ export default function ThreadPage() {
         // Transform the API response into our Thread type
         const transformedThread: Thread = {
           id: threadId,
-          messages: [{
-            id: data[0].id,
-            content: data[0].content,
-            isFromMe: data[0].isFromMe,
-            lastUpdated: data[0].lastUpdated,
-            linkedinProfileURL: data[0].linkedinProfileURL,
-            recipientLinkedInFollowerCount: data[0].recipientLinkedInFollowerCount,
-            recipientName: data[0].recipientName
-          }]
+          messages: data
+            .map((msg: any) => ({
+              id: msg.id || threadId,
+              content: msg.content,
+              isFromMe: msg.isFromMe,
+              lastUpdated: msg.lastUpdated,
+              linkedinProfileURL: msg.linkedinProfileURL,
+              recipientLinkedInFollowerCount: msg.recipientLinkedInFollowerCount,
+              recipientName: msg.recipientName,
+              avatar: msg.avatar
+            }))
+            .sort((a, b) => new Date(a.lastUpdated).getTime() - new Date(b.lastUpdated).getTime()) // Sort by date ascending (oldest first)
         };
         
         setThread(transformedThread);
@@ -293,7 +323,7 @@ export default function ThreadPage() {
 
   return (
     <div className="container mx-auto py-6 max-w-4xl">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-6">
         <Button
           variant="ghost"
           className="gap-2"
@@ -305,26 +335,47 @@ export default function ThreadPage() {
       </div>
 
       <div className="border border-border rounded-lg bg-background">
-        <div className="flex items-center justify-between p-4 border-b border-border">
-          <div className="flex items-center gap-3">
-            <h2 className="text-xl font-semibold">{firstMessage.recipientName || 'Unknown'}</h2>
-            <span className="px-2 py-1 text-sm bg-secondary rounded-md">
-              {firstMessage.recipientLinkedInFollowerCount} followers
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            {firstMessage.linkedinProfileURL && (
-              <Button 
-                variant="outline"
-                onClick={() => handleOpenLink(firstMessage.linkedinProfileURL)}
-              >
-                LinkedIn Profile
-              </Button>
+        <div className="flex items-center justify-between p-6 border-b border-border">
+          <div className="flex items-center gap-4">
+            {firstMessage.isFromMe === "true" ? (
+              <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground border-4 border-primary flex items-center justify-center text-2xl font-medium">
+                Me
+              </div>
+            ) : (
+              <img 
+                src={firstMessage.avatar || ''}
+                alt={firstMessage.recipientName}
+                className="w-16 h-16 rounded-full border-4 border-border object-cover"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.parentElement!.innerHTML = `
+                    <div class="w-16 h-16 rounded-full bg-secondary flex items-center justify-center text-2xl font-medium">
+                      ${firstMessage.recipientName?.[0]?.toUpperCase()}
+                    </div>
+                  `;
+                }}
+              />
             )}
+            <div>
+              <h2 className="text-xl font-semibold">{firstMessage.recipientName || 'Unknown'}</h2>
+              <div className="text-sm text-muted-foreground flex items-center gap-2">
+                <span>{firstMessage.recipientLinkedInFollowerCount} followers</span>
+                {firstMessage.linkedinProfileURL && (
+                  <Button 
+                    variant="link"
+                    className="p-0 h-auto font-normal"
+                    onClick={() => handleOpenLink(firstMessage.linkedinProfileURL)}
+                  >
+                    View LinkedIn profile
+                  </Button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-6">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {thread.messages.map((message) => (
             <MessageGroup key={message.id} message={message} />
           ))}
