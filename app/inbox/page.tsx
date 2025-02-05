@@ -101,6 +101,12 @@ export default function InboxPage() {
 
   useEffect(() => {
     const fetchMessages = async () => {
+      if (!token) {
+        console.log('No token available, skipping fetch');
+        setIsLoading(false);
+        return;
+      }
+
       try {
         console.log('Fetching messages with token:', token);
         
@@ -111,28 +117,30 @@ export default function InboxPage() {
           },
         });
         
-        console.log('Response status:', response.status);
-        
-        if (!response.ok) throw new Error('Failed to fetch messages');
+        if (!response.ok) {
+          throw new Error(`Failed to fetch messages: ${response.status}`);
+        }
+
         const data = await response.json();
         
-        console.log('API Base URL:', process.env.NEXT_PUBLIC_API_BASE_URL);
         console.log('Full message data:', data);
 
-        setMessages(data.filter((msg: Message) => msg.content !== null));
+        const sortedMessages = data
+          .filter((msg: Message) => msg.content !== null)
+          .sort((a: Message, b: Message) => 
+            new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
+          );
+
+        setMessages(sortedMessages);
       } catch (err) {
         console.error('Detailed fetch error:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load messages');
+        setError(err instanceof Error ? err.message : 'Failed to fetch messages');
       } finally {
         setIsLoading(false);
       }
     };
 
-    if (token) {
-      fetchMessages();
-    } else {
-      console.log('No token available, skipping fetch');
-    }
+    fetchMessages();
   }, [token]);
 
   useEffect(() => {
@@ -145,10 +153,18 @@ export default function InboxPage() {
     router.push(`/thread?id=${messageId}`);
   };
 
-  if (isLoading || authLoading || !token) {
-    return null;
+  if (isLoading || authLoading) {
+    return <div className="container mx-auto py-6 max-w-4xl">Loading...</div>;
   }
-  if (error) return <div className="text-destructive p-4">{error}</div>;
+  if (error) {
+    return (
+      <div className="container mx-auto py-6 max-w-4xl">
+        <div className="text-destructive p-4 border border-destructive/50 rounded-lg">
+          {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-6 max-w-4xl">
