@@ -1,0 +1,291 @@
+{
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "linkedout/generate-draft",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          -660,
+          80
+        ],
+        "id": "dd0e6383-c1b6-44f7-9de1-a68df9d9a811",
+        "name": "Webhook",
+        "webhookId": "cd280d92-962d-4e63-bc5e-a34377856e24"
+      },
+      {
+        "parameters": {
+          "model": "claude-3-5-haiku-20241022",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+        "typeVersion": 1.2,
+        "position": [
+          260,
+          280
+        ],
+        "id": "5df2691a-18b5-46d3-9a44-b23d1cbead75",
+        "name": "Anthropic Chat Model",
+        "credentials": {
+          "anthropicApi": {
+            "id": "j1q7GUYlf2zim40Y",
+            "name": "Max's anthropic account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={\n  \"draftReply\": \"Failed to generate a draft (chain failed in n8n)\"\n}",
+          "options": {
+            "responseCode": 500
+          }
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          780,
+          180
+        ],
+        "id": "3705830f-d1a9-44b4-842d-9ddbc4384d74",
+        "name": "Respond with error"
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={\n  \"draftReply\": \"{{ $json.text.replace(/\\n/g, \"\\\\n\").replace(/\"/g, '\\\\\"') }}\"\n}",
+          "options": {
+            "responseCode": 200
+          }
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          780,
+          0
+        ],
+        "id": "0a323ccf-9a10-4ecc-bfe9-3771d511872e",
+        "name": "Respond with draft"
+      },
+      {
+        "parameters": {
+          "inputText": "=# Message from sender\n{{ $json.body.messageToReplyTo }}",
+          "categories": {
+            "categories": [
+              {
+                "category": "decision-to-be-made",
+                "description": "Use this category if the input LinkedIn message has a decision or an ask being made by sender to user"
+              },
+              {
+                "category": "simple-reply",
+                "description": "Use this category if there is no decision to be made."
+              }
+            ]
+          },
+          "options": {
+            "fallback": "other",
+            "systemPromptTemplate": "Please classify the text provided by the user into one of the following categories: {categories}, and use the provided formatting instructions below. Don't explain, and only output the json.\n\nThe input text to be classified is a LinkedIn message. Your task is to understand if that message is making a request of the end user that requires a decision to be made. For example, \"Can we jump on a call next week?\" has a decision to be made, since the answer could be yes or no. \"Wow I love your content\" on the other hand does not require a decision from the user.\n\nThe two categories are mutually exclusive. A message will always fall into either decision-to-be-made or simple-reply"
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.textClassifier",
+        "typeVersion": 1,
+        "position": [
+          -420,
+          80
+        ],
+        "id": "769728ee-eaab-48fb-b883-cdd8845acad4",
+        "name": "Text Classifier"
+      },
+      {
+        "parameters": {
+          "model": "claude-3-5-haiku-20241022",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+        "typeVersion": 1.2,
+        "position": [
+          -480,
+          280
+        ],
+        "id": "c9b8154b-b67f-4cfb-ab94-bef1ac36ba9c",
+        "name": "Anthropic Chat Model1",
+        "credentials": {
+          "anthropicApi": {
+            "id": "j1q7GUYlf2zim40Y",
+            "name": "Max's anthropic account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "94778920-651f-468a-a0ce-83eec3637a2b",
+                "name": "prompt",
+                "value": "=You are an AI assistant tasked with drafting email replies in a specific user's voice for LinkedIn messages. Your task is to create a draft reply that sound authentic to the user's writing style.\n\nHere is the message you need to reply to:\n<message>\n{{ $json.body.messageToReplyTo }}\n</message>\n\nThe recipient's full name is:\n<recipient>\n{{ $json.body.toFullName }}\n</recipient>\n\n\n\nHere are some examples of the user's writing style:\n<user_voice_examples>\n<example1>\nHey Carlos, thanks so much for taking the time to reach out and tell me that 🙏 \n\nI’m curious, what topics are most interesting for you? Esp if you have any feedback beyond the high level “what is agent” kind of stuff since there’s plenty of this kind of content by now. Thanks!\n</example1>\n</example2>\nHey David, sorry that your message slipped through. It's been full on with my AI sprint! Thanks a lot, messages like yours are a lovely validation for the content I'm trying to put out.\n\nn8n could definitely help with that! One way to start could be setting up a template that can autotag your messages. From there you can have simpler workflows that do something with that type of email, e.g. \"If tagged with X, upload to this notion DB and send me a Slack message\".\n\nHere's an AI template that does label assignment in Gmail. Could be used as a starting point: https://n8n.io/workflows/2197-auto-label-incoming-gmail-messages-with-ai-nodes/\n\nHappy flowgramming and if you need any help we've got some lovely helpful folks on community.n8n.io who can assist :)\n</example2>\n</user_voice_examples>\n\nWhen drafting the replies:\n1. Maintain the user's writing style, tone, and voice based on the provided examples.\n2. Keep the responses concise and professional, but in the voice of the examples.\n3. Address the main points or questions in the original message.\n5. End the message with an appropriate closing that matches the user's style.\n6. If the sender message is short, try to match that in reply. For example, sender message is 1-2 sentences, aim to reply within 1-2 sentences.\n\nFormat your output as follows:\n\nRemember to tailor your language and tone to match the user's writing style as closely as possible, while maintaining professionalism and addressing the content of the original message. Always reply in English, irrespective of input message. \n\nOnly output the draft reply, nothing else.",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          0,
+          220
+        ],
+        "id": "757b7c69-5fc5-4bb4-86c7-96467fff29bd",
+        "name": "set simple prompt"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "94778920-651f-468a-a0ce-83eec3637a2b",
+                "name": "prompt",
+                "value": "=# Role\n\nYou are an AI assistant tasked with drafting email replies in a specific user's voice for LinkedIn messages. Your task is to create a draft reply that sound authentic to the user's writing style.\n\n# Task\nComplete the task by following these steps in order:\n1. Analyze the message and identify the decision that needs to be made on their request. For example, if the message asks \"Can you get on a call next week?\", the possible cases for the reply are \"Yes\" or \"No\"\n2. Write a draft reply for each possible reply case you identified in step 1\n3. Output all possible reply cases\n\n# Context\n\nHere is the message you need to reply to:\n<message>\n{{ $json.body.messageToReplyTo }}\n</message>\n\nThe recipient's full name is:\n<recipient>\n{{ $json.body.toFullName }}\n</recipient>\n\nHere are some examples of the user's writing style:\n<user_voice_examples>\n<example1>\nHey Carlos, thanks so much for taking the time to reach out and tell me that 🙏 \n\nI’m curious, what topics are most interesting for you? Esp if you have any feedback beyond the high level “what is agent” kind of stuff since there’s plenty of this kind of content by now. Thanks!\n</example1>\n</example2>\nHey David, sorry that your message slipped through. It's been full on with my AI sprint! Thanks a lot, messages like yours are a lovely validation for the content I'm trying to put out.\n\nn8n could definitely help with that! One way to start could be setting up a template that can autotag your messages. From there you can have simpler workflows that do something with that type of email, e.g. \"If tagged with X, upload to this notion DB and send me a Slack message\".\n\nHere's an AI template that does label assignment in Gmail. Could be used as a starting point: https://n8n.io/workflows/2197-auto-label-incoming-gmail-messages-with-ai-nodes/\n\nHappy flowgramming and if you need any help we've got some lovely helpful folks on community.n8n.io who can assist :)\n</example2>\n</user_voice_examples>\n\n\n# Rules\n\nWhen drafting the replies:\n1. Maintain the user's writing style, tone, and voice based on the provided examples.\n2. Keep the responses concise and professional, but in the voice of the examples.\n3. Address the main points or questions in the original message.\n4. If applicable, provide a clear yes or no response, followed by a brief explanation or additional details.\n5. End the message with an appropriate closing that matches the user's style.\n\n# Output\n\nFormat your output as follows:\n- Always reply in English, irrespective of input message. \n- Only output the draft reply, nothing else.\n- Output the possible cases for the reply in the following format:\n--- YES to meeting next week ---\nReply message for \"YES\" case\n\n--- NO to meeting next week ---\nReply message for \"YES\" case",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          0,
+          0
+        ],
+        "id": "bc9ab425-6abb-41d7-ba88-7ae43cd9a3ce",
+        "name": "set decision prompt"
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "={{ $json.prompt }}"
+        },
+        "type": "@n8n/n8n-nodes-langchain.chainLlm",
+        "typeVersion": 1.5,
+        "position": [
+          320,
+          80
+        ],
+        "id": "ab1018f9-f4f6-490d-9371-167817e130f9",
+        "name": "Generate Draft",
+        "retryOnFail": false,
+        "onError": "continueErrorOutput"
+      }
+    ],
+    "connections": {
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Text Classifier",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Anthropic Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Generate Draft",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Text Classifier": {
+        "main": [
+          [
+            {
+              "node": "set decision prompt",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "set simple prompt",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "set simple prompt",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Anthropic Chat Model1": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Text Classifier",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "set simple prompt": {
+        "main": [
+          [
+            {
+              "node": "Generate Draft",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "set decision prompt": {
+        "main": [
+          [
+            {
+              "node": "Generate Draft",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Generate Draft": {
+        "main": [
+          [
+            {
+              "node": "Respond with draft",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Respond with error",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "pinData": {},
+    "meta": {
+      "templateCredsSetupCompleted": true,
+      "instanceId": "8306bac07189426109b85dc84bda2fe508e10d48e9008000e3c6ce251a84a04a"
+    }
+  }

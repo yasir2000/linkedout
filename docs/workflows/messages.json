@@ -1,0 +1,249 @@
+{
+    "nodes": [
+      {
+        "parameters": {
+          "fieldToSplitOut": "items",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1,
+        "position": [
+          460,
+          0
+        ],
+        "id": "f2b08b62-4649-47e0-b13a-6ce928bf4fea",
+        "name": "Split Messages"
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ $json.threads }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          1080,
+          0
+        ],
+        "id": "7bd768a7-e294-47a3-a066-ffd62179fc21",
+        "name": "Send Response"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "34ea30e5-5515-4423-8913-dba9491cadc0",
+                "name": "recipientName",
+                "value": "={{ $json.expand.sender.firstName }} {{ $json.expand.sender.lastName }}",
+                "type": "string"
+              },
+              {
+                "id": "1deb7874-79ef-46c4-bc62-07f9f3036fa1",
+                "name": "content",
+                "value": "={{ $json.message }}",
+                "type": "string"
+              },
+              {
+                "id": "140e2a80-617b-46d8-bbd9-0009d3934391",
+                "name": "lastUpdated",
+                "value": "={{ $json.updated }}",
+                "type": "string"
+              },
+              {
+                "id": "4b4cba2d-6853-4492-8f42-2e0c73d5ea25",
+                "name": "id",
+                "value": "={{ $json.id }}",
+                "type": "string"
+              },
+              {
+                "id": "629a9a02-49c9-4ef5-85db-75e74b3e01b0",
+                "name": "recipientLinkedInFollowerCount",
+                "value": "={{ $json.expand.sender.followers }}",
+                "type": "string"
+              },
+              {
+                "id": "bcaba44b-7daa-4281-8da5-5172523b476e",
+                "name": "linkedinProfileURL",
+                "value": "={{ $json.expand.sender.linkedinUrl }}",
+                "type": "string"
+              },
+              {
+                "id": "8bba379b-568a-42aa-b2c1-e9547a4be4f0",
+                "name": "isFromMe",
+                "value": "={{ $json.isFromMe }}",
+                "type": "string"
+              },
+              {
+                "id": "a5992dac-bbff-4229-ac41-6a688ad19753",
+                "name": "avatar",
+                "value": "={{ $json.expand.sender.avatar }}",
+                "type": "string"
+              },
+              {
+                "id": "664e4b4a-feea-41fb-9d25-43f72a37b030",
+                "name": "messageId",
+                "value": "={{ $json.messageId }}",
+                "type": "string"
+              },
+              {
+                "id": "c6c87ed7-2f67-4ade-9e50-5814f54c731a",
+                "name": "chatId",
+                "value": "={{ $json.chatId }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          660,
+          0
+        ],
+        "id": "2fc8bcac-7126-4fb7-adab-fda49613b3b1",
+        "name": "Format Message Data"
+      },
+      {
+        "parameters": {
+          "aggregate": "aggregateAllItemData",
+          "destinationFieldName": "threads",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.aggregate",
+        "typeVersion": 1,
+        "position": [
+          840,
+          0
+        ],
+        "id": "354eda9d-2b9f-48f0-8ffe-5dd51a9a7a6e",
+        "name": "Combine Messages"
+      },
+      {
+        "parameters": {
+          "url": "={{ $env.POCKET_BASE_URL }}/api/collections/inboxes/records?filter=(sender='{{ $json.query.id }}')&expand=sender&sort=-created",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "={{ $json.headers.authorization }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          240,
+          0
+        ],
+        "id": "556e4857-e386-4417-a451-5927217eac93",
+        "name": "get users",
+        "notes": "## Fetch User Messages\nRetrieves all messages for a specific user with sender details"
+      },
+      {
+        "parameters": {
+          "path": "threads",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          0,
+          0
+        ],
+        "id": "f49160ec-bacd-4c9f-af4c-4952f5b467e2",
+        "name": "Webhook",
+        "webhookId": "b9c6c08c-9036-46db-a0b5-99a75347802b"
+      },
+      {
+        "parameters": {
+          "content": "## Message Thread Flow\n\nFetches and formats message threads:\n- Gets messages by sender ID\n- Expands sender details\n- Sorts by creation date\n- Formats for frontend display",
+          "height": 220,
+          "width": 400,
+          "color": 7
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [240, -200],
+        "name": "Workflow Overview"
+      },
+      {
+        "parameters": {
+          "content": "⚠️ Required Environment Variable:\nPOCKET_BASE_URL\n\nEither replace URLs directly or inject in n8n instance",
+          "height": 120,
+          "width": 300,
+          "color": 5
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [240, 200],
+        "name": "Environment Setup"
+      }
+    ],
+    "connections": {
+      "Split Messages": {
+        "main": [
+          [
+            {
+              "node": "Format Message Data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format Message Data": {
+        "main": [
+          [
+            {
+              "node": "Combine Messages",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Combine Messages": {
+        "main": [
+          [
+            {
+              "node": "Send Response",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "get users": {
+        "main": [
+          [
+            {
+              "node": "Split Messages",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "get users",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "pinData": {},
+    "meta": {
+      "templateCredsSetupCompleted": true,
+      "instanceId": "8306bac07189426109b85dc84bda2fe508e10d48e9008000e3c6ce251a84a04a"
+    }
+  }
