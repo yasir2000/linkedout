@@ -207,6 +207,7 @@ export default function ThreadPage() {
   const { toast } = useToast();
   const [isExpanded, setIsExpanded] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const threadId = searchParams?.get('id');
 
@@ -290,6 +291,10 @@ export default function ThreadPage() {
       }, token);
       
       setReply(draftResponse.draftReply);
+      
+      textareaRef.current?.scrollIntoView({ behavior: 'smooth' });
+      textareaRef.current?.focus();
+      
     } finally {
       setIsGenerating(false);
     }
@@ -535,6 +540,7 @@ export default function ThreadPage() {
           <div className="flex flex-col gap-4">
             <div className="relative flex-grow">
               <Textarea
+                ref={textareaRef}
                 value={reply}
                 onChange={(e) => setReply(e.target.value)}
                 onKeyDown={handleKeyDown}
@@ -545,12 +551,12 @@ export default function ThreadPage() {
                 )}
                 disabled={isSending}
               />
-              <div className="absolute top-3 right-3 flex gap-2">
+              <div className="absolute top-3 right-3 flex gap-2 z-10">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setIsExpanded(!isExpanded)}
-                  className="text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  className="text-muted-foreground hover:text-foreground hover:bg-muted/50 bg-background"
                 >
                   {isExpanded ? (
                     <Shrink className="h-5 w-5" />
@@ -563,7 +569,7 @@ export default function ThreadPage() {
                   size="sm"
                   onClick={handleGenerateDraft}
                   disabled={isGenerating}
-                  className="text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  className="text-muted-foreground hover:text-foreground hover:bg-muted/50 bg-background"
                 >
                   <Wand2 className="h-5 w-5 text-foreground" />
                 </Button>
