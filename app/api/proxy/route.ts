@@ -12,7 +12,9 @@ const ALLOWED_ENDPOINTS = [
   'linkout_messages',
   'messages',
   'linkedout/message',
-  'linkedout/generate-draft'
+  'linkedout/generate-draft',
+  'auth/login',
+  'auth-with-password'
 ] as const;
 
 const endpointSchema = z.enum(ALLOWED_ENDPOINTS);
