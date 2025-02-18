@@ -90,9 +90,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     Cookies.set('auth_token', data.token, { 
       expires: 7,
       path: '/',
+      domain: window.location.hostname,
       sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-      httpOnly: true
+      secure: false  // Keep this false for now since it works
     });
     
     console.log('Cookie set, checking:', {
