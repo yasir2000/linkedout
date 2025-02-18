@@ -81,17 +81,20 @@ function MessageGroup({ message }: { message: Message }) {
   );
 }
 
+function LoadingSpinner() {
+  return (
+    <div className="flex justify-center py-4">
+      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-foreground"></div>
+    </div>
+  );
+}
+
 export default function InboxPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const { token, isLoading: authLoading, logout } = useAuth();
-
-  const handleLogout = () => {
-    logout();
-    router.push('/login');
-  };
 
   const fetchMessages = async () => {
     if (!token) {
@@ -125,11 +128,21 @@ export default function InboxPage() {
         );
 
       setMessages(sortedMessages);
+      setIsLoading(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch messages');
-    } finally {
-      setIsLoading(false);
     }
+  };
+
+  const handleRefresh = async () => {
+    setIsLoading(true);
+    await fetchMessages();
+    return Promise.resolve();
+  };
+
+  const handleLogout = () => {
+    logout();
+    router.push('/login');
   };
 
   useEffect(() => {
@@ -160,37 +173,49 @@ export default function InboxPage() {
   }
 
   return (
-    <div className="container mx-auto py-6 max-w-4xl">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Messages</h1>
-        <Button 
-          variant="ghost" 
-          size="sm"
-          className="gap-2"
-          onClick={handleLogout}
-        >
-          <LogOut className="h-4 w-4" />
-          Logout
-        </Button>
-      </div>
-      {messages.length > 0 ? (
-        <div className="border border-border rounded-lg divide-y divide-border">
-          {messages.map((message, index) => (
-            <div 
-              key={message.id}
-              onClick={() => handleMessageClick(message.id)}
-              className={cn(
-                "p-4 hover:bg-muted/10 transition-colors cursor-pointer",
-                "flex items-start gap-4"
-              )}
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto py-6 max-w-4xl">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Messages</h1>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleRefresh}
+              disabled={isLoading}
             >
-              <MessageGroup message={message} />
-            </div>
-          ))}
+              {isLoading ? 'Refreshing...' : 'Refresh'}
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="gap-2"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
+          </div>
         </div>
-      ) : (
-        <EmptyState />
-      )}
+        {messages.length > 0 ? (
+          <div className="border border-border rounded-lg divide-y divide-border">
+            {messages.map((message, index) => (
+              <div 
+                key={message.id}
+                onClick={() => handleMessageClick(message.id)}
+                className={cn(
+                  "p-4 hover:bg-muted/10 transition-colors cursor-pointer",
+                  "flex items-start gap-4"
+                )}
+              >
+                <MessageGroup message={message} />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <EmptyState />
+        )}
+      </div>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Wand2, LogOut, Expand, Shrink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -152,6 +152,15 @@ function stringToColor(str: string): string {
   return `hsl(${hue}, 65%, 25%)`; // Dark mode friendly
 }
 
+// Add loading spinner component
+function LoadingSpinner() {
+  return (
+    <div className="flex justify-center py-4">
+      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-foreground"></div>
+    </div>
+  );
+}
+
 export default function ThreadPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -165,6 +174,7 @@ export default function ThreadPage() {
   const { token, isLoading: authLoading, logout } = useAuth();
   const { toast } = useToast();
   const [isExpanded, setIsExpanded] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const threadId = searchParams?.get('id');
 
@@ -184,9 +194,8 @@ export default function ThreadPage() {
       });
 
       if (response.status === 401) {
-        // Session expired
         handleLogout();
-        return;
+        return Promise.resolve();
       }
 
       if (!response.ok) throw new Error('Failed to fetch thread');
@@ -210,9 +219,11 @@ export default function ThreadPage() {
       };
       
       setThread(transformedThread);
+      return Promise.resolve();
     } catch (err) {
       console.error('Thread fetch error:', err);
       setError(err instanceof Error ? err.message : 'Failed to load thread');
+      return Promise.reject(err);
     } finally {
       setIsLoading(false);
     }
@@ -254,8 +265,29 @@ export default function ThreadPage() {
 
   const handleSend = async () => {
     if (!reply.trim() || isSending) return;
-
     setIsSending(true);
+
+    // Create optimistic message
+    const optimisticMessage: Message = {
+      id: Date.now().toString(),
+      content: reply,
+      isFromMe: "true",
+      lastUpdated: new Date().toISOString(),
+      linkedinProfileURL: thread?.messages[0]?.linkedinProfileURL || "",
+      recipientLinkedInFollowerCount: thread?.messages[0]?.recipientLinkedInFollowerCount || "",
+      recipientName: thread?.messages[0]?.recipientName || "",
+      chatId: thread?.messages[0]?.chatId,
+      avatar: thread?.messages[0]?.avatar
+    };
+
+    // Optimistically update UI
+    setThread(prev => prev ? {
+      ...prev,
+      messages: [...prev.messages, optimisticMessage].sort(
+        (a, b) => new Date(a.lastUpdated).getTime() - new Date(b.lastUpdated).getTime()
+      )
+    } : null);
+
     try {
       // Send through proxy
       const response = await fetch('/api/proxy', {
@@ -273,24 +305,11 @@ export default function ThreadPage() {
       });
 
       if (response.status === 401) {
-        // Session expired
         handleLogout();
         return;
       }
 
-      console.log('Message API Response:', {
-        status: response.status,
-        statusText: response.statusText
-      });
-
-      const responseText = await response.text();
-      console.log('Message API Response Text:', responseText);
-
-      if (!response.ok) {
-        throw new Error(`Failed to save message: ${response.status} ${responseText}`);
-      }
-
-      // N8N webhook call through proxy
+      // N8N webhook call
       const n8nResponse = await fetch('/api/proxy', {
         method: 'POST',
         headers: {
@@ -308,20 +327,11 @@ export default function ThreadPage() {
         }),
       });
 
-      console.log('N8N Response:', {
-        status: n8nResponse.status,
-        statusText: n8nResponse.statusText
-      });
-
-      const n8nResponseText = await n8nResponse.text();
-      console.log('N8N Response Text:', n8nResponseText);
-
       if (!n8nResponse.ok) {
-        throw new Error(`Failed to trigger workflow: ${n8nResponse.status} ${n8nResponseText}`);
+        throw new Error(`Failed to trigger workflow: ${n8nResponse.status}`);
       }
 
       setReply('');
-      fetchThread();
       
       toast({
         title: "Message sent",
@@ -329,7 +339,12 @@ export default function ThreadPage() {
       });
 
     } catch (error) {
-      console.error('Detailed send error:', error);
+      // Remove optimistic message on error
+      setThread(prev => prev ? {
+        ...prev,
+        messages: prev.messages.filter(msg => msg.id !== optimisticMessage.id)
+      } : null);
+
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to send message",
@@ -352,6 +367,14 @@ export default function ThreadPage() {
       window.open(url, '_blank');
     }
   };
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [thread?.messages]);
 
   if (!mounted) {
     return null;
@@ -409,133 +432,136 @@ export default function ThreadPage() {
   }
 
   return (
-    <div className="container mx-auto py-6 max-w-4xl flex flex-col h-[calc(100vh-48px)]">
-      <div className="flex items-center justify-between mb-6">
-        <Button
-          variant="ghost"
-          className="gap-2"
-          onClick={() => router.push('/inbox')}
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back
-        </Button>
-        <Button 
-          variant="ghost" 
-          size="sm"
-          className="gap-2"
-          onClick={handleLogout}
-        >
-          <LogOut className="h-4 w-4" />
-          Logout
-        </Button>
-      </div>
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto py-6 max-w-4xl flex flex-col h-[calc(100vh-48px)]">
+        <div className="flex items-center justify-between mb-6">
+          <Button
+            variant="ghost"
+            className="gap-2"
+            onClick={() => router.push('/inbox')}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            className="gap-2"
+            onClick={handleLogout}
+          >
+            <LogOut className="h-4 w-4" />
+            Logout
+          </Button>
+        </div>
 
-      <div className="border border-border rounded-lg bg-background flex flex-col flex-1 min-h-0">
-        <div className="flex items-center justify-between p-6 border-b border-border">
-          <div className="flex items-center gap-4">
-            <img 
-              src={firstMessage.avatar || ''}
-              alt={firstMessage.recipientName}
-              className="w-16 h-16 rounded-full border-4 border-border object-cover"
-              onError={(e) => {
-                e.currentTarget.onerror = null;
-                e.currentTarget.style.display = 'none';
-                e.currentTarget.parentElement!.innerHTML = `
-                  <div class="w-16 h-16 rounded-full bg-secondary flex items-center justify-center text-2xl font-medium">
-                    ${firstMessage.recipientName?.[0]?.toUpperCase()}
-                  </div>
-                `;
-              }}
-            />
-            <div>
-              <h2 className="text-xl font-semibold">{firstMessage.recipientName || 'Unknown'}</h2>
-              <div className="text-sm text-muted-foreground flex items-center gap-2">
-                <span>{firstMessage.recipientLinkedInFollowerCount} followers</span>
-                {firstMessage.linkedinProfileURL && (
-                  <Button 
-                    variant="link"
-                    className="p-0 h-auto font-normal"
-                    onClick={() => handleOpenLink(firstMessage.linkedinProfileURL)}
-                  >
-                    View LinkedIn profile
-                  </Button>
-                )}
+        <div className="border border-border rounded-lg bg-background flex flex-col flex-1 min-h-0">
+          <div className="flex items-center justify-between p-6 border-b border-border">
+            <div className="flex items-center gap-4">
+              <img 
+                src={firstMessage.avatar || ''}
+                alt={firstMessage.recipientName}
+                className="w-16 h-16 rounded-full border-4 border-border object-cover"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.parentElement!.innerHTML = `
+                    <div class="w-16 h-16 rounded-full bg-secondary flex items-center justify-center text-2xl font-medium">
+                      ${firstMessage.recipientName?.[0]?.toUpperCase()}
+                    </div>
+                  `;
+                }}
+              />
+              <div>
+                <h2 className="text-xl font-semibold">{firstMessage.recipientName || 'Unknown'}</h2>
+                <div className="text-sm text-muted-foreground flex items-center gap-2">
+                  <span>{firstMessage.recipientLinkedInFollowerCount} followers</span>
+                  {firstMessage.linkedinProfileURL && (
+                    <Button 
+                      variant="link"
+                      className="p-0 h-auto font-normal"
+                      onClick={() => handleOpenLink(firstMessage.linkedinProfileURL)}
+                    >
+                      View LinkedIn profile
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="flex-1 overflow-y-auto min-h-0">
-          <div className="p-6 space-y-6">
-            {thread.messages.map((message) => (
-              <MessageGroup key={message.id} message={message} />
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-4 rounded-xl border border-border bg-background p-4">
-        <div className="flex flex-col gap-4">
-          <div className="relative flex-grow">
-            <Textarea
-              value={reply}
-              onChange={(e) => setReply(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Write your reply..."
-              className={cn(
-                "w-full resize-none p-4 pr-12 text-base transition-all duration-200",
-                isExpanded ? "min-h-[500px]" : "min-h-[100px]"
-              )}
-              disabled={isSending}
-            />
-            <div className="absolute top-3 right-3 flex gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="text-muted-foreground hover:text-foreground hover:bg-muted/50"
-              >
-                {isExpanded ? (
-                  <Shrink className="h-5 w-5" />
-                ) : (
-                  <Expand className="h-5 w-5" />
-                )}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleGenerateDraft}
-                disabled={isGenerating}
-                className="text-muted-foreground hover:text-foreground hover:bg-muted/50"
-              >
-                <Wand2 className="h-5 w-5 text-foreground" />
-              </Button>
+          <div className="flex-1 overflow-y-auto min-h-0">
+            <div className="p-6 space-y-6">
+              {thread.messages.map((message) => (
+                <MessageGroup key={message.id} message={message} />
+              ))}
+              <div ref={messagesEndRef} />
             </div>
           </div>
+        </div>
 
-          <div className="flex justify-end">
-            <Button 
-              size="lg"
-              className="px-8 gap-2"
-              disabled={!reply.trim() || isSending}
-              onClick={handleSend}
-            >
-              Send
-              <svg 
-                viewBox="0 0 24 24" 
-                className="h-5 w-5" 
-                fill="none" 
-                xmlns="http://www.w3.org/2000/svg"
+        <div className="mt-4 rounded-xl border border-border bg-background p-4">
+          <div className="flex flex-col gap-4">
+            <div className="relative flex-grow">
+              <Textarea
+                value={reply}
+                onChange={(e) => setReply(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Write your reply..."
+                className={cn(
+                  "w-full resize-none p-4 pr-12 text-base transition-all duration-200",
+                  isExpanded ? "min-h-[500px]" : "min-h-[100px]"
+                )}
+                disabled={isSending}
+              />
+              <div className="absolute top-3 right-3 flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                >
+                  {isExpanded ? (
+                    <Shrink className="h-5 w-5" />
+                  ) : (
+                    <Expand className="h-5 w-5" />
+                  )}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleGenerateDraft}
+                  disabled={isGenerating}
+                  className="text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                >
+                  <Wand2 className="h-5 w-5 text-foreground" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex justify-end">
+              <Button 
+                size="lg"
+                className="px-8 gap-2"
+                disabled={!reply.trim() || isSending}
+                onClick={handleSend}
               >
-                <path 
-                  d="M5 12H19M19 12L13 6M19 12L13 18" 
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </Button>
+                Send
+                <svg 
+                  viewBox="0 0 24 24" 
+                  className="h-5 w-5" 
+                  fill="none" 
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path 
+                    d="M5 12H19M19 12L13 6M19 12L13 18" 
+                    stroke="currentColor" 
+                    strokeWidth="2" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </Button>
+            </div>
           </div>
         </div>
       </div>
