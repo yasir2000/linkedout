@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Wand2, LogOut } from 'lucide-react';
+import { ArrowLeft, Wand2, LogOut, Expand, Shrink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { format, formatDistanceToNow } from 'date-fns';
@@ -164,6 +164,7 @@ export default function ThreadPage() {
   const [error, setError] = useState<string | null>(null);
   const { token, isLoading: authLoading, logout } = useAuth();
   const { toast } = useToast();
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const threadId = searchParams?.get('id');
 
@@ -408,7 +409,7 @@ export default function ThreadPage() {
   }
 
   return (
-    <div className="container mx-auto py-6 max-w-4xl">
+    <div className="container mx-auto py-6 max-w-4xl flex flex-col h-[calc(100vh-48px)]">
       <div className="flex items-center justify-between mb-6">
         <Button
           variant="ghost"
@@ -429,7 +430,7 @@ export default function ThreadPage() {
         </Button>
       </div>
 
-      <div className="border border-border rounded-lg bg-background">
+      <div className="border border-border rounded-lg bg-background flex flex-col flex-1 min-h-0">
         <div className="flex items-center justify-between p-6 border-b border-border">
           <div className="flex items-center gap-4">
             <img 
@@ -464,40 +465,62 @@ export default function ThreadPage() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {thread.messages.map((message) => (
-            <MessageGroup key={message.id} message={message} />
-          ))}
+        <div className="flex-1 overflow-y-auto min-h-0">
+          <div className="p-6 space-y-6">
+            {thread.messages.map((message) => (
+              <MessageGroup key={message.id} message={message} />
+            ))}
+          </div>
         </div>
       </div>
 
       <div className="mt-4 rounded-xl border border-border bg-background p-4">
-        <div className="flex gap-3">
+        <div className="flex flex-col gap-4">
           <div className="relative flex-grow">
             <Textarea
               value={reply}
               onChange={(e) => setReply(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Write reply here..."
-              className="min-h-[100px] resize-none border-0 focus-visible:ring-0 text-lg p-0 pr-28"
+              placeholder="Write your reply..."
+              className={cn(
+                "w-full resize-none p-4 pr-12 text-base transition-all duration-200",
+                isExpanded ? "min-h-[500px]" : "min-h-[100px]"
+              )}
+              disabled={isSending}
             />
-            <Button
-              variant="ghost"
-              className="absolute right-0 top-0 gap-2 hover:bg-transparent text-muted-foreground hover:text-foreground"
-              onClick={handleGenerateDraft}
-              disabled={isGenerating}
-            >
-              <Wand2 className="h-5 w-5" />
-              Generate
-            </Button>
+            <div className="absolute top-3 right-3 flex gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              >
+                {isExpanded ? (
+                  <Shrink className="h-5 w-5" />
+                ) : (
+                  <Expand className="h-5 w-5" />
+                )}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleGenerateDraft}
+                disabled={isGenerating}
+                className="text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              >
+                <Wand2 className="h-5 w-5 text-foreground" />
+              </Button>
+            </div>
           </div>
-          <div className="flex-shrink-0">
+
+          <div className="flex justify-end">
             <Button 
-              size="icon"
-              className="h-12 w-12 rounded-lg bg-muted hover:bg-muted/80"
+              size="lg"
+              className="px-8 gap-2"
               disabled={!reply.trim() || isSending}
               onClick={handleSend}
             >
+              Send
               <svg 
                 viewBox="0 0 24 24" 
                 className="h-5 w-5" 
