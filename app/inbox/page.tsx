@@ -112,7 +112,7 @@ export default function InboxPage() {
     }
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/linkout_messages`, {
+      const response = await fetch('/api/proxy?endpoint=linkout_messages', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

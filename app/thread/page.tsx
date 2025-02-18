@@ -256,11 +256,13 @@ export default function ThreadPage() {
 
     setIsSending(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/messages`, {
+      // Send through proxy
+      const response = await fetch('/api/proxy', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
+          'x-endpoint': 'messages',
         },
         body: JSON.stringify({
           content: reply,
@@ -287,11 +289,13 @@ export default function ThreadPage() {
         throw new Error(`Failed to save message: ${response.status} ${responseText}`);
       }
 
-      // Then trigger the n8n workflow
-      const n8nResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/linkedout/message`, {
+      // N8N webhook call through proxy
+      const n8nResponse = await fetch('/api/proxy', {
         method: 'POST',
         headers: {
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
+          'x-endpoint': 'linkedout/message',
         },
         body: JSON.stringify({
           message: reply,
