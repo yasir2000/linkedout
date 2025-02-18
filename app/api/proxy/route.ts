@@ -2,11 +2,6 @@ import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { z } from 'zod';
 
-// Rate limiting map
-const rateLimitMap = new Map<string, { count: number; timestamp: number }>();
-const RATE_LIMIT = 100; // requests per minute
-const WINDOW_MS = 60 * 1000; // 1 minute
-
 // Stricter endpoint validation
 const ALLOWED_ENDPOINTS = [
   'linkout_messages',
@@ -45,25 +40,6 @@ const validateBody = (endpoint: string, body: unknown) => {
   }
 };
 
-// Add response sanitization
-const sanitizeResponse = (data: unknown) => {
-  if (typeof data === 'object' && data !== null) {
-    const sanitized = { ...data } as Record<string, unknown>;
-    const sensitiveFields = ['token', 'password', 'apiKey'];
-    sensitiveFields.forEach(field => delete sanitized[field]);
-    return sanitized;
-  }
-  return data;
-};
-
-// Remove or update security headers to allow client-side JS
-const securityHeaders = {
-  'X-Content-Type-Options': 'nosniff',
-  'X-Frame-Options': 'DENY',
-  'Referrer-Policy': 'strict-origin-when-cross-origin',
-  'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
-};
-
 export async function POST(request: Request) {
   const headersList = headers();
   const token = headersList.get('authorization');
@@ -76,19 +52,6 @@ export async function POST(request: Request) {
   // Check content type
   if (contentType !== 'application/json') {
     return NextResponse.json({ error: 'Invalid content type' }, { status: 415 });
-  }
-
-  // Rate limiting
-  const clientIp = headersList.get('x-forwarded-for') || 'unknown';
-  const now = Date.now();
-  const clientData = rateLimitMap.get(clientIp);
-  if (clientData && now - clientData.timestamp < WINDOW_MS) {
-    if (clientData.count > RATE_LIMIT) {
-      return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
-    }
-    rateLimitMap.set(clientIp, { count: clientData.count + 1, timestamp: clientData.timestamp });
-  } else {
-    rateLimitMap.set(clientIp, { count: 1, timestamp: now });
   }
 
   try {

@@ -199,7 +199,6 @@ export default function ThreadPage() {
   const [reply, setReply] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSending, setIsSending] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const [thread, setThread] = useState<Thread | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -261,10 +260,6 @@ export default function ThreadPage() {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     if (!threadId || !token) return;
@@ -412,10 +407,6 @@ export default function ThreadPage() {
   useEffect(() => {
     scrollToBottom();
   }, [thread?.messages]);
-
-  if (!mounted) {
-    return null;
-  }
 
   if (!threadId) {
     router.push('/inbox');
