@@ -158,16 +158,16 @@ function MessageGroup({ message }: { message: Message }) {
           />
         )}
       </div>
-      <div className="flex-grow space-y-1">
-        <div className="flex items-center gap-2">
-          <span className="font-semibold text-lg">
+      <div className="flex-grow space-y-1 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="font-semibold text-lg truncate">
             {isMe ? "You" : message.recipientName || 'Unknown'}
           </span>
           <span className="text-sm text-muted-foreground">
             {format(date, "MMM d, yyyy 'at' h:mm a")}
           </span>
         </div>
-        <div className="text-base text-muted-foreground max-w-[85vw] md:max-w-2xl">
+        <div className="text-base text-muted-foreground break-words overflow-hidden">
           {formatMessage(message.content || '')}
         </div>
       </div>
