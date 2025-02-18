@@ -77,8 +77,7 @@ LinkedOut is a modern web application that helps you manage and respond to Linke
 
 ### PocketBase
 1. One click deploy PocketBase [PocketBase](https://app.cloud-station.io/template-store/pocketbase)
-2. Set up the required collections for messages and authentication
-3. Configure CORS settings for your frontend
+2. Import the schema from [docs/schemas/pocketbase-schema.json](docs/schemas/pocketbase-schema.json)
 
 ### N8N
 1. Install N8N following instructions at [n8n.io](https://n8n.io)
