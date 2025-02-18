@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Wand2 } from 'lucide-react';
+import { ArrowLeft, Wand2, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { format, formatDistanceToNow } from 'date-fns';
@@ -162,10 +162,15 @@ export default function ThreadPage() {
   const [thread, setThread] = useState<Thread | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { token, isLoading: authLoading } = useAuth();
+  const { token, isLoading: authLoading, logout } = useAuth();
   const { toast } = useToast();
 
   const threadId = searchParams?.get('id');
+
+  const handleLogout = () => {
+    logout();
+    router.push('/login');
+  };
 
   const fetchThread = async () => {
     setIsLoading(true);
@@ -176,6 +181,13 @@ export default function ThreadPage() {
           'Content-Type': 'application/json',
         },
       });
+
+      if (response.status === 401) {
+        // Session expired
+        handleLogout();
+        return;
+      }
+
       if (!response.ok) throw new Error('Failed to fetch thread');
       const data = await response.json();
       
@@ -244,7 +256,6 @@ export default function ThreadPage() {
 
     setIsSending(true);
     try {
-      // First, send to your API
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/messages`, {
         method: 'POST',
         headers: {
@@ -257,6 +268,12 @@ export default function ThreadPage() {
           chatId: thread?.messages[0]?.chatId,
         }),
       });
+
+      if (response.status === 401) {
+        // Session expired
+        handleLogout();
+        return;
+      }
 
       console.log('Message API Response:', {
         status: response.status,
@@ -396,6 +413,15 @@ export default function ThreadPage() {
         >
           <ArrowLeft className="h-4 w-4" />
           Back
+        </Button>
+        <Button 
+          variant="ghost" 
+          size="sm"
+          className="gap-2"
+          onClick={handleLogout}
+        >
+          <LogOut className="h-4 w-4" />
+          Logout
         </Button>
       </div>
 

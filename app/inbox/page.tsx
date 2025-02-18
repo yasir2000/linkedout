@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from "@/lib/utils";
-import { InboxIcon } from "lucide-react";
+import { InboxIcon, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -97,49 +97,57 @@ export default function InboxPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const { token, isLoading: authLoading } = useAuth();
+  const { token, isLoading: authLoading, logout } = useAuth();
 
-  useEffect(() => {
-    const fetchMessages = async () => {
-      if (!token) {
-        console.log('No token available, skipping fetch');
-        setIsLoading(false);
+  const handleLogout = () => {
+    logout();
+    router.push('/login');
+  };
+
+  const fetchMessages = async () => {
+    if (!token) {
+      console.log('No token available, skipping fetch');
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/linkout_messages`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.status === 401) {
+        handleLogout();
         return;
       }
 
-      try {
-        console.log('Fetching messages with token:', token);
-        
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/linkout_messages`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
-        
-        if (!response.ok) {
-          throw new Error(`Failed to fetch messages: ${response.status}`);
-        }
-
-        const data = await response.json();
-        
-        console.log('Full message data:', data);
-
-        const sortedMessages = data
-          .filter((msg: Message) => msg.content !== null)
-          .sort((a: Message, b: Message) => 
-            new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
-          );
-
-        setMessages(sortedMessages);
-      } catch (err) {
-        console.error('Detailed fetch error:', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch messages');
-      } finally {
-        setIsLoading(false);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch messages: ${response.status}`);
       }
-    };
 
+      const data = await response.json();
+      
+      console.log('Full message data:', data);
+
+      const sortedMessages = data
+        .filter((msg: Message) => msg.content !== null)
+        .sort((a: Message, b: Message) => 
+          new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
+        );
+
+      setMessages(sortedMessages);
+    } catch (err) {
+      console.error('Detailed fetch error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch messages');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchMessages();
   }, [token]);
 
@@ -168,7 +176,18 @@ export default function InboxPage() {
 
   return (
     <div className="container mx-auto py-6 max-w-4xl">
-      <h1 className="text-2xl font-bold mb-6">Messages</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Messages</h1>
+        <Button 
+          variant="ghost" 
+          size="sm"
+          className="gap-2"
+          onClick={handleLogout}
+        >
+          <LogOut className="h-4 w-4" />
+          Logout
+        </Button>
+      </div>
       {messages.length > 0 ? (
         <div className="border border-border rounded-lg divide-y divide-border">
           {messages.map((message, index) => (
