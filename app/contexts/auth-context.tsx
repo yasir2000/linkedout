@@ -33,11 +33,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    console.log('Checking stored auth on mount:', {
-      localStorage: localStorage.getItem('token'),
-      cookie: Cookies.get('auth_token'),
-      documentCookie: document.cookie
-    });
+    // console.log('Checking stored auth on mount:', {
+    //   localStorage: localStorage.getItem('token'),
+    //   cookie: Cookies.get('auth_token'),
+    //   documentCookie: document.cookie
+    // });
     
     const storedToken = localStorage.getItem('token');
     if (storedToken) {
@@ -53,8 +53,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const login = async (email: string, password: string) => {
-    console.log('Login attempt with:', email);
-    
     const response = await fetch(`${process.env.NEXT_PUBLIC_POCKETBASE_URL}/api/collections/_superusers/auth-with-password`, {
       method: 'POST',
       headers: {
@@ -66,14 +64,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }),
     });
 
-    console.log('Login response status:', response.status);
-    
     if (!response.ok) {
       throw new Error('Login failed');
     }
 
     const data = await response.json();
-    console.log('Login response data:', data);
     
     setToken(data.token);
     setUser({
@@ -82,22 +77,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       verified: data.record.verified
     });
     
-    // Update cookie settings
     localStorage.setItem('token', data.token);
-    console.log('Setting cookie with token:', data.token);
     
-    // More permissive cookie settings
     Cookies.set('auth_token', data.token, { 
       expires: 7,
       path: '/',
       domain: window.location.hostname,
       sameSite: 'lax',
-      secure: false  // Keep this false for now since it works
-    });
-    
-    console.log('Cookie set, checking:', {
-      fromJs: Cookies.get('auth_token'),
-      fromDocument: document.cookie
+      secure: false
     });
   };
 

@@ -39,13 +39,6 @@ function EmptyState() {
 function MessageGroup({ message }: { message: Message }) {
   const initial = message.author ? message.author[0]?.toUpperCase() : '?';
   const date = message.lastUpdated ? new Date(message.lastUpdated) : new Date();
-  
-  console.log('Message data:', {
-    id: message.id,
-    author: message.author,
-    hasAvatar: !!message.avatar,
-    avatarUrl: message.avatar
-  });
 
   return (
     <div className="flex gap-6">
@@ -56,10 +49,6 @@ function MessageGroup({ message }: { message: Message }) {
             alt={message.author}
             className="w-14 h-14 rounded-full border-2 border-border object-cover"
             onError={(e) => {
-              console.error('Image load error:', {
-                src: e.currentTarget.src,
-                error: e
-              });
               e.currentTarget.onerror = null;
               e.currentTarget.style.display = 'none';
               e.currentTarget.parentElement!.innerHTML = `
@@ -106,7 +95,6 @@ export default function InboxPage() {
 
   const fetchMessages = async () => {
     if (!token) {
-      console.log('No token available, skipping fetch');
       setIsLoading(false);
       return;
     }
@@ -130,8 +118,6 @@ export default function InboxPage() {
 
       const data = await response.json();
       
-      console.log('Full message data:', data);
-
       const sortedMessages = data
         .filter((msg: Message) => msg.content !== null)
         .sort((a: Message, b: Message) => 
@@ -140,7 +126,6 @@ export default function InboxPage() {
 
       setMessages(sortedMessages);
     } catch (err) {
-      console.error('Detailed fetch error:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch messages');
     } finally {
       setIsLoading(false);
