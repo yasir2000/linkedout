@@ -95,6 +95,38 @@ function Avatar({ author }: { author: Author }) {
 }
 
 function MessageGroup({ message }: { message: Message }) {
+  const isUrl = (text: string) => {
+    const urlPattern = /https?:\/\/[^\s]+/g;
+    return urlPattern.test(text);
+  };
+
+  const formatMessage = (content: string) => {
+    if (!content) return '';
+    
+    // Split text into URLs and non-URLs
+    const parts = content.split(/(https?:\/\/[^\s]+)/g);
+    
+    return parts.map((part, index) => {
+      if (isUrl(part)) {
+        return (
+          <a 
+            key={index}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline break-all inline-block"
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            {part}
+          </a>
+        );
+      }
+      return <span key={index} className="break-words">{part}</span>;
+    });
+  };
+
   const isMe = message.isFromMe === "true";
   const initial = message.recipientName ? message.recipientName[0]?.toUpperCase() : '?';
   const date = message.lastUpdated ? new Date(message.lastUpdated) : new Date();
@@ -135,9 +167,9 @@ function MessageGroup({ message }: { message: Message }) {
             {format(date, "MMM d, yyyy 'at' h:mm a")}
           </span>
         </div>
-        <p className="text-base text-muted-foreground whitespace-pre-wrap">
-          {message.content || ''}
-        </p>
+        <div className="text-base text-muted-foreground max-w-[85vw] md:max-w-2xl">
+          {formatMessage(message.content || '')}
+        </div>
       </div>
     </div>
   );
