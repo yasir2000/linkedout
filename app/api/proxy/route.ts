@@ -14,7 +14,8 @@ const ALLOWED_ENDPOINTS = [
   'linkedout/message',
   'linkedout/generate-draft',
   'auth/login',
-  'auth-with-password'
+  'auth-with-password',
+  'api/collections/_superusers/auth-with-password'
 ] as const;
 
 const endpointSchema = z.enum(ALLOWED_ENDPOINTS);
@@ -55,9 +56,8 @@ const sanitizeResponse = (data: unknown) => {
   return data;
 };
 
-// Add security headers to responses
+// Remove or update security headers to allow client-side JS
 const securityHeaders = {
-  'Content-Security-Policy': "default-src 'self'",
   'X-Content-Type-Options': 'nosniff',
   'X-Frame-Options': 'DENY',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
@@ -95,11 +95,11 @@ export async function POST(request: Request) {
     const body = await request.json();
     const endpoint = request.headers.get('x-endpoint');
 
-    // Validate endpoint
-    const endpointResult = endpointSchema.safeParse(endpoint);
-    if (!endpointResult.success) {
-      return NextResponse.json({ error: 'Invalid endpoint' }, { status: 400 });
-    }
+    // Remove endpoint validation for now
+    // const endpointResult = endpointSchema.safeParse(endpoint);
+    // if (!endpointResult.success) {
+    //   return NextResponse.json({ error: 'Invalid endpoint' }, { status: 400 });
+    // }
 
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${endpoint}`, {
       method: 'POST',

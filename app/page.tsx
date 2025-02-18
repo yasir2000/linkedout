@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/auth-context';
+import { useAuth } from '@/app/contexts/auth-context';
 
 export default function Home() {
   const router = useRouter();

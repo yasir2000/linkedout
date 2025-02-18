@@ -5,7 +5,7 @@ import { InboxIcon, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from '@/contexts/auth-context';
+import { useAuth } from '@/app/contexts/auth-context';
 import { formatDistanceToNow } from "date-fns";
 
 interface Message {

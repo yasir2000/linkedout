@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { format, formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/contexts/auth-context';
+import { useAuth } from '@/app/contexts/auth-context';
 import { useToast } from '@/hooks/use-toast';
 
 interface Author {
