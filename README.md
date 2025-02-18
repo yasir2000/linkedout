@@ -3,7 +3,9 @@
 LinkedOut is a modern web application that helps you manage and respond to LinkedIn messages efficiently using AI. Built with Next.js, TypeScript, and Tailwind CSS.
 
 <div align="center">
-![Preview](docs/assets/preview.png)
+  <img src="assets/preview.png" alt="LinkedOut Preview" width="100%" />
+</div>
+
 ## Features
 
 - 🤖 AI-powered message drafts
