@@ -49,7 +49,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = () => {
     setToken(null);
     localStorage.removeItem('token');
-    Cookies.remove('auth_token', { path: '/' });
+    document.cookie = 'auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    window.location.href = '/login';
   };
 
   const login = async (email: string, password: string) => {
