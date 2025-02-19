@@ -47,9 +47,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const logout = () => {
+    // Clear all auth state
     setToken(null);
+    setUser(null);
+    
+    // Clear stored credentials
     localStorage.removeItem('token');
-    document.cookie = 'auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    Cookies.remove('auth_token', {
+      path: '/',
+      domain: window.location.hostname
+    });
+    
+    // Redirect (using window.location ensures full page refresh)
     window.location.href = '/login';
   };
 
