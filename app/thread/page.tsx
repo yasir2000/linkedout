@@ -639,7 +639,7 @@ export default function ThreadPage() {
                 onKeyDown={handleKeyDown}
                 placeholder="Write your reply..."
                 className={cn(
-                  "w-full resize-none p-4 pr-24 text-base transition-all duration-200",
+                  "w-full resize-none p-4 pr-28 text-base transition-all duration-200",
                   isExpanded ? "min-h-[500px]" : "min-h-[100px]"
                 )}
                 disabled={isSending}
@@ -730,7 +730,7 @@ export default function ThreadPage() {
 
               <Button 
                 size="lg"
-                className="px-8 gap-2"
+                className="px-4 gap-2"
                 disabled={!reply.trim() || isSending}
                 onClick={handleSend}
               >
