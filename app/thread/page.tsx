@@ -2,13 +2,26 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Wand2, LogOut, Expand, Shrink } from 'lucide-react';
+import { ArrowLeft, Wand2, LogOut, Expand, Shrink, Clipboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { format, formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/app/contexts/auth-context';
 import { useToast } from '@/hooks/use-toast';
+import { 
+  Popover, 
+  PopoverContent, 
+  PopoverTrigger 
+} from '@/components/ui/popover';
+import { ScrollArea } from '@/components/ui/scroll-area';
+
+// Add the TextSnippet interface
+interface TextSnippet {
+  name: string;
+  value: string;
+}
+
 
 interface Author {
   id?: string;
@@ -208,7 +221,93 @@ export default function ThreadPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+
+  // Add new state for text snippets
+  const [snippets, setSnippets] = useState<TextSnippet[]>([]);
+  const [isLoadingSnippets, setIsLoadingSnippets] = useState(false);
+  const [snippetsError, setSnippetsError] = useState<string | null>(null);
+  const [isSnippetsOpen, setIsSnippetsOpen] = useState(false);
+
+
   const threadId = searchParams?.get('id');
+
+
+  // Add function to fetch text snippets
+  const fetchTextSnippets = async () => {
+    if (!token) return;
+    
+    setIsLoadingSnippets(true);
+    setSnippetsError(null);
+    
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL}/linkedout/snippets`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.status === 401) {
+        handleLogout();
+        return;
+      }
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch text snippets');
+      }
+      
+      const data = await response.json();
+      setSnippets(data.textSnippets || []);
+    } catch (error) {
+      console.error('Error fetching text snippets:', error);
+      setSnippetsError('Failed to load text snippets');
+    } finally {
+      setIsLoadingSnippets(false);
+    }
+  };
+  
+  // Function to insert snippet at cursor position or append to existing text
+  const insertSnippet = (snippetValue: string) => {
+    if (textareaRef.current) {
+      const textarea = textareaRef.current;
+      const selectionStart = textarea.selectionStart;
+      const selectionEnd = textarea.selectionEnd;
+      
+      const newText = 
+        reply.substring(0, selectionStart) + 
+        snippetValue + 
+        reply.substring(selectionEnd);
+      
+      setReply(newText);
+      
+      // Focus back on textarea after inserting snippet
+      setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(
+          selectionStart + snippetValue.length,
+          selectionStart + snippetValue.length
+        );
+      }, 0);
+    } else {
+      // If textarea is not focused, append to the end
+      setReply((prev) => {
+        // Add a newline if there's already text and it doesn't end with one
+        const separator = prev && !prev.endsWith('\n') ? '\n' : '';
+        return prev + separator + snippetValue;
+      });
+    }
+    
+    // Close the popover after inserting
+    setIsSnippetsOpen(false);
+  };
+
+  // Fetch snippets when component mounts
+  useEffect(() => {
+    if (token) {
+      fetchTextSnippets();
+    }
+  }, [token]);
+
 
   const handleLogout = () => {
     logout();
@@ -481,9 +580,9 @@ export default function ThreadPage() {
             Logout
           </Button>
         </div>
-
+        
         <div className="border border-border rounded-lg bg-background flex flex-col flex-1 min-h-0">
-          <div className="flex items-center justify-between p-6 border-b border-border">
+        <div className="flex items-center justify-between p-6 border-b border-border">
             <div className="flex items-center gap-4">
               <img 
                 src={firstMessage.avatar || ''}
@@ -567,6 +666,64 @@ export default function ThreadPage() {
                 >
                   <Wand2 className="h-5 w-5 text-foreground" />
                 </Button>
+              </div>
+              
+              {/* Add Text Snippets Button and Popover */}
+              <div className="absolute bottom-3 left-3">
+                <Popover open={isSnippetsOpen} onOpenChange={setIsSnippetsOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-2 text-muted-foreground hover:text-foreground"
+                      onClick={() => {
+                        if (!snippets.length && !isLoadingSnippets) {
+                          fetchTextSnippets();
+                        }
+                      }}
+                    >
+                      <Clipboard className="h-4 w-4" />
+                      Text Snippets
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent 
+                    className="w-80 p-0" 
+                    align="start"
+                    side="left"
+                  >
+                    <div className="py-2">
+                      <h3 className="font-medium px-4 py-2 border-b">Text Snippets</h3>
+                      
+                      {isLoadingSnippets ? (
+                        <div className="p-4 text-center">
+                          <LoadingSpinner />
+                        </div>
+                      ) : snippetsError ? (
+                        <div className="p-4 text-center text-destructive">
+                          {snippetsError}
+                        </div>
+                      ) : snippets.length === 0 ? (
+                        <div className="p-4 text-center text-muted-foreground">
+                          No text snippets, set them in Pocketbase
+                        </div>
+                      ) : (
+                        <ScrollArea className="h-[calc(6*42px)] max-h-[calc(6*42px)]">
+                          <div className="py-1">
+                            {snippets.map((snippet, index) => (
+                              <button
+                                key={index}
+                                className="w-full text-left px-4 py-2 text-sm hover:bg-muted/50 focus:bg-muted/50 focus:outline-none truncate"
+                                onClick={() => insertSnippet(snippet.value)}
+                              >
+                                {snippet.name}
+                              </button>
+                            ))}
+                          </div>
+                        </ScrollArea>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
 

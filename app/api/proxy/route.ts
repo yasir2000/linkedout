@@ -8,6 +8,7 @@ const ALLOWED_ENDPOINTS = [
   'messages',
   'linkedout/message',
   'linkedout/generate-draft',
+  'linkedout/snippets',
   'auth/login',
   'auth-with-password',
   'api/collections/_superusers/auth-with-password'
