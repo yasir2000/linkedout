@@ -56,7 +56,7 @@ LinkedOut is a modern web application that helps you manage and respond to Linke
    Create a `.env.local` file in the root directory:
    ```env
    NEXT_PUBLIC_POCKETBASE_URL=your_pocketbase_url
-   NEXT_PUBLIC_API_BASE_URL=your_n8n_url/webhook
+   NEXT_PUBLIC_N8N_WEBHOOK_URL=your_n8n_url/webhook
    ```
 
 4. **Backend Setup:**
@@ -88,7 +88,7 @@ LinkedOut is a modern web application that helps you manage and respond to Linke
 
 | Variable | Description | Required |
 |----------|-------------|----------|
-| `NEXT_PUBLIC_API_BASE_URL` | N8N URL | Yes |
+| `NEXT_PUBLIC_N8N_WEBHOOK_URL` | N8N URL | Yes |
 | `NEXT_PUBLIC_POCKETBASE_URL` | PocketBase URL | Yes |
 
 ---

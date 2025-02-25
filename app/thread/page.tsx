@@ -44,7 +44,7 @@ async function generateDraft(
   token: string
 ): Promise<{ draftReply: string }> {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/linkedout/generate-draft`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL}/linkedout/generate-draft`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -218,7 +218,7 @@ export default function ThreadPage() {
   const fetchThread = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/threads?id=${threadId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL}/threads?id=${threadId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

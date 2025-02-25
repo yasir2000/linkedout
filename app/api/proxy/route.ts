@@ -64,7 +64,7 @@ export async function POST(request: Request) {
     //   return NextResponse.json({ error: 'Invalid endpoint' }, { status: 400 });
     // }
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${endpoint}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL}/${endpoint}`, {
       method: 'POST',
       headers: {
         'Authorization': token,
@@ -114,7 +114,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${endpoint}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL}/${endpoint}`, {
       headers: {
         'Authorization': token,
         'Content-Type': 'application/json',
