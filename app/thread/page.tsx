@@ -132,7 +132,7 @@ function MessageGroup({ message }: { message: Message }) {
   const date = message.lastUpdated ? new Date(message.lastUpdated) : new Date();
 
   return (
-    <div className="flex gap-4 mb-8">
+    <div className="flex gap-4 mb-8 group relative">
       <div className="flex-shrink-0">
         {isMe ? (
           <div className={cn(
@@ -167,7 +167,7 @@ function MessageGroup({ message }: { message: Message }) {
             {format(date, "MMM d, yyyy 'at' h:mm a")}
           </span>
         </div>
-        <div className="text-base text-muted-foreground break-words overflow-hidden">
+        <div className="text-base text-muted-foreground break-words whitespace-pre-line pr-16">
           {formatMessage(message.content || '')}
         </div>
       </div>
@@ -520,7 +520,10 @@ export default function ThreadPage() {
           <div className="flex-1 overflow-y-auto min-h-0">
             <div className="p-6 space-y-6">
               {thread.messages.map((message) => (
-                <MessageGroup key={message.id} message={message} />
+                <MessageGroup 
+                  key={message.id} 
+                  message={message} 
+                />
               ))}
               <div ref={messagesEndRef} />
             </div>
@@ -537,7 +540,7 @@ export default function ThreadPage() {
                 onKeyDown={handleKeyDown}
                 placeholder="Write your reply..."
                 className={cn(
-                  "w-full resize-none p-4 pr-12 text-base transition-all duration-200",
+                  "w-full resize-none p-4 pr-24 text-base transition-all duration-200",
                   isExpanded ? "min-h-[500px]" : "min-h-[100px]"
                 )}
                 disabled={isSending}
