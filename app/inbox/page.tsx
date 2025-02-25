@@ -160,7 +160,14 @@ export default function InboxPage() {
   };
 
   if (isLoading || authLoading) {
-    return <div className="container mx-auto py-6 max-w-4xl">Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-foreground"></div>
+          <p className="text-muted-foreground">Loading messages...</p>
+        </div>
+      </div>
+    );
   }
   if (error) {
     return (
