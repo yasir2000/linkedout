@@ -1,11 +1,16 @@
 /** @type {import('next').NextConfig} */
+const getDomain = (url) => url?.replace('https://', '').split('/')[0];
+
 const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
   images: { 
     unoptimized: true,
-    domains: ['pocketbase-elmrqdwp.az-csprod1.cloud-station.io', 'n8n-zjrvqodz.cloud-station.app']
+    domains: [
+      getDomain(process.env.NEXT_PUBLIC_POCKETBASE_URL),
+      getDomain(process.env.NEXT_PUBLIC_API_BASE_URL)
+    ].filter(Boolean)
   },
 };
 
