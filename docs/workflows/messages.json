@@ -718,35 +718,6 @@
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "={{ $env.POCKET_BASE_URL }}/api/collections/users/auth-with-password",
-        "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "identity",
-              "value": "={{ $env.POCKET_BASE_EMAIL }}"
-            },
-            {
-              "name": "password",
-              "value": "={{ $env.POCKET_BASE_PASSWORD }}"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        700,
-        -100
-      ],
-      "id": "261dc7b0-9618-49ad-86e5-c3776494485f",
-      "name": "signin",
-      "notes": "## PocketBase Authentication\nSigns into PocketBase admin account.\n\n⚠️ Configuration Required:\n1. Set environment variables:\n   - POCKET_BASE_URL\n   - POCKET_BASE_EMAIL\n   - POCKET_BASE_PASSWORD"
-    },
-    {
-      "parameters": {
         "conditions": {
           "options": {
             "caseSensitive": true,
@@ -874,8 +845,7 @@
     {
       "parameters": {
         "content": "\nreplace: https://api.unipile.com/v1/users/\nwith your Unipile API endpoint\n\nUpdate query parameters:\n- account_id: Your LinkedIn account ID\n- linkedin_sections: \"*\" (or specific sections)",
-        "height": 180,
-        "width": 340,
+        "width": 360,
         "color": 5
       },
       "type": "n8n-nodes-base.stickyNote",
@@ -919,18 +889,47 @@
     },
     {
       "parameters": {
-        "content": "\nEnvironment Variables Required:\n\nPOCKET_BASE_EMAIL=admin@yourdomain.com\nPOCKET_BASE_PASSWORD=your-secure-password\nPOCKET_BASE_URL=https://your-pocketbase-instance\n\nSet these in your n8n environment or credentials",
+        "content": "Authentication Configuration:\n\nCredentials are generated from CloudStation:\n- POCKET_BASE_EMAIL\n- POCKET_BASE_PASSWORD\n- POCKET_BASE_URL=https://your-pocketbase-instance",
         "height": 200,
         "width": 400
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
         560,
-        -320
+        100
       ],
       "typeVersion": 1,
       "id": "5b0d312c-e535-48b6-a5f4-3221e59a539c",
       "name": "Environment Variables"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.POCKET_BASE_URL }}/api/collections/_superusers/auth-with-password",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "identity",
+              "value": "=POCKET_BASE_EMAIL"
+            },
+            {
+              "name": "password",
+              "value": "={{ $env.POCKET_BASE_PASSWORD }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        700,
+        -100
+      ],
+      "id": "90d8c0c4-27c3-40b2-8a6a-c42afc979808",
+      "name": "signin",
+      "notes": "## PocketBase Authentication\nSigns into PocketBase admin account.\n\n⚠️ Configuration Required:\n1. Set environment variables:\n   - POCKET_BASE_URL\n   - POCKET_BASE_EMAIL\n   - POCKET_BASE_PASSWORD"
     }
   ],
   "connections": {
@@ -1167,17 +1166,6 @@
         ]
       ]
     },
-    "signin": {
-      "main": [
-        [
-          {
-            "node": "get user",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "If": {
       "main": [
         [
@@ -1190,6 +1178,17 @@
         [
           {
             "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "signin": {
+      "main": [
+        [
+          {
+            "node": "get user",
             "type": "main",
             "index": 0
           }
