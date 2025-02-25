@@ -560,8 +560,8 @@ export default function ThreadPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto py-6 max-w-4xl flex flex-col h-[calc(100vh-48px)]">
-        <div className="flex items-center justify-between mb-6">
+      <div className="container mx-auto py-4 max-w-4xl flex flex-col h-[calc(100vh-48px)]">
+        <div className="flex items-center justify-between mb-4">
           <Button
             variant="ghost"
             className="gap-2"
@@ -582,7 +582,7 @@ export default function ThreadPage() {
         </div>
         
         <div className="border border-border rounded-lg bg-background flex flex-col flex-1 min-h-0">
-        <div className="flex items-center justify-between p-6 border-b border-border">
+        <div className="flex items-center justify-between p-4 border-b border-border">
             <div className="flex items-center gap-4">
               <img 
                 src={firstMessage.avatar || ''}
@@ -667,67 +667,67 @@ export default function ThreadPage() {
                   <Wand2 className="h-5 w-5 text-foreground" />
                 </Button>
               </div>
-              
-              {/* Add Text Snippets Button and Popover */}
-              <div className="absolute bottom-3 left-3">
-                <Popover open={isSnippetsOpen} onOpenChange={setIsSnippetsOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="gap-2 text-muted-foreground hover:text-foreground"
-                      onClick={() => {
-                        if (!snippets.length && !isLoadingSnippets) {
-                          fetchTextSnippets();
-                        }
-                      }}
-                    >
-                      <Clipboard className="h-4 w-4" />
-                      Text Snippets
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent 
-                    className="w-80 p-0" 
-                    align="start"
-                    side="left"
-                  >
-                    <div className="py-2">
-                      <h3 className="font-medium px-4 py-2 border-b">Text Snippets</h3>
-                      
-                      {isLoadingSnippets ? (
-                        <div className="p-4 text-center">
-                          <LoadingSpinner />
-                        </div>
-                      ) : snippetsError ? (
-                        <div className="p-4 text-center text-destructive">
-                          {snippetsError}
-                        </div>
-                      ) : snippets.length === 0 ? (
-                        <div className="p-4 text-center text-muted-foreground">
-                          No text snippets, set them in Pocketbase
-                        </div>
-                      ) : (
-                        <ScrollArea className="h-[calc(6*42px)] max-h-[calc(6*42px)]">
-                          <div className="py-1">
-                            {snippets.map((snippet, index) => (
-                              <button
-                                key={index}
-                                className="w-full text-left px-4 py-2 text-sm hover:bg-muted/50 focus:bg-muted/50 focus:outline-none truncate"
-                                onClick={() => insertSnippet(snippet.value)}
-                              >
-                                {snippet.name}
-                              </button>
-                            ))}
-                          </div>
-                        </ScrollArea>
-                      )}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </div>
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex justify-between items-center">
+              {/* Text Snippets Button and Popover - moved outside textarea */}
+              <Popover open={isSnippetsOpen} onOpenChange={setIsSnippetsOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="gap-2 text-muted-foreground hover:text-foreground"
+                    onClick={() => {
+                      if (!snippets.length && !isLoadingSnippets) {
+                        fetchTextSnippets();
+                      }
+                    }}
+                  >
+                    <Clipboard className="h-4 w-4" />
+                    Text Snippets
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent 
+                  className="w-80 p-0" 
+                  align="start"
+                  side="top"
+                  alignOffset={-50}
+                  sideOffset={10}
+                >
+                  <div className="py-2">
+                    <h3 className="font-medium px-4 py-2 border-b">Text Snippets</h3>
+                    
+                    {isLoadingSnippets ? (
+                      <div className="p-4 text-center">
+                        <LoadingSpinner />
+                      </div>
+                    ) : snippetsError ? (
+                      <div className="p-4 text-center text-destructive">
+                        {snippetsError}
+                      </div>
+                    ) : snippets.length === 0 ? (
+                      <div className="p-4 text-center text-muted-foreground">
+                        No text snippets, set them in Pocketbase
+                      </div>
+                    ) : (
+                      <ScrollArea className="max-h-[calc(6*42px)]">
+                        <div className="py-1">
+                          {snippets.map((snippet, index) => (
+                            <button
+                              key={index}
+                              className="w-full text-left px-4 py-2 text-sm hover:bg-muted/50 focus:bg-muted/50 focus:outline-none truncate"
+                              onClick={() => insertSnippet(snippet.value)}
+                            >
+                              {snippet.name}
+                            </button>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    )}
+                  </div>
+                </PopoverContent>
+              </Popover>
+
               <Button 
                 size="lg"
                 className="px-8 gap-2"
