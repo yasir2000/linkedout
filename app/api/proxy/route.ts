@@ -1,71 +1,38 @@
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
-import { z } from 'zod';
 
-// Stricter endpoint validation
-const ALLOWED_ENDPOINTS = [
-  'linkout_messages',
-  'messages',
-  'linkedout/message',
-  'linkedout/generate-draft',
-  'linkedout/snippets',
-  'auth/login',
-  'auth-with-password',
-  'api/collections/_superusers/auth-with-password'
-] as const;
-
-const endpointSchema = z.enum(ALLOWED_ENDPOINTS);
-
-// Add request schemas
-const messageSchema = z.object({
-  content: z.string().min(1),
-  threadId: z.string(),
-  chatId: z.string().optional(),
-});
-
-const generateDraftSchema = z.object({
-  toFullName: z.string(),
-  messageToReplyTo: z.string(),
-  messageCategory: z.string(),
-});
-
-// Validate request body based on endpoint
-const validateBody = (endpoint: string, body: unknown) => {
-  switch(endpoint) {
-    case 'messages':
-      return messageSchema.parse(body);
-    case 'linkedout/generate-draft':
-      return generateDraftSchema.parse(body);
-    default:
-      return body;
-  }
+// Check if an endpoint is a setup endpoint
+const isSetupEndpoint = (endpoint: string): boolean => {
+  return endpoint.startsWith('setup/');
 };
 
 export async function POST(request: Request) {
   const headersList = headers();
   const token = headersList.get('authorization');
   const contentType = headersList.get('content-type');
+  const endpoint = request.headers.get('x-endpoint');
+  
+  if (!endpoint) {
+    return NextResponse.json({ error: 'Missing endpoint' }, { status: 400 });
+  }
 
+  // Return error for setup endpoints - these will be handled by a different route
+  if (isSetupEndpoint(endpoint)) {
+    return NextResponse.json({ error: 'Setup endpoints not supported in this route' }, { status: 400 });
+  }
+
+  // Require authentication for all non-setup endpoints
   if (!token) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // Check content type
-  if (contentType !== 'application/json') {
-    return NextResponse.json({ error: 'Invalid content type' }, { status: 415 });
-  }
-
   try {
     const body = await request.json();
-    const endpoint = request.headers.get('x-endpoint');
-
-    // Remove endpoint validation for now
-    // const endpointResult = endpointSchema.safeParse(endpoint);
-    // if (!endpointResult.success) {
-    //   return NextResponse.json({ error: 'Invalid endpoint' }, { status: 400 });
-    // }
-
-    const response = await fetch(`${process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL}/${endpoint}`, {
+    
+    console.log(`Forwarding request to n8n webhook: ${endpoint}`);
+    
+    // Forward to n8n webhook
+    const response = await fetch(`https://devrel.app.n8n.cloud/webhook/${endpoint}`, {
       method: 'POST',
       headers: {
         'Authorization': token,
@@ -74,9 +41,11 @@ export async function POST(request: Request) {
       body: JSON.stringify(body),
     });
 
+    console.log(`n8n webhook response status: ${response.status}`);
+    
     // First try to get the response as text
     const responseText = await response.text();
-
+    
     // Try to parse as JSON, if it fails, return the text
     try {
       const data = JSON.parse(responseText);
@@ -99,37 +68,3 @@ export async function POST(request: Request) {
     );
   }
 }
-
-export async function GET(request: Request) {
-  const headersList = headers();
-  const token = headersList.get('authorization');
-  const { searchParams } = new URL(request.url);
-  const endpoint = searchParams.get('endpoint');
-
-  if (!token) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  if (!endpoint) {
-    return NextResponse.json({ error: 'Missing endpoint' }, { status: 400 });
-  }
-
-  try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL}/${endpoint}`, {
-      headers: {
-        'Authorization': token,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    const data = await response.json();
-    return NextResponse.json(data, { status: response.status });
-
-  } catch (error) {
-    console.error('Proxy error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' }, 
-      { status: 500 }
-    );
-  }
-} 
