@@ -1,6 +1,8 @@
-# LinkedOut - AI-Powered LinkedIn Message Manager
+# LinkedOut - AI-Powered LinkedIn Inbox
 
-LinkedOut is a modern web application that helps you manage and respond to LinkedIn messages efficiently using AI. Built with Next.js, TypeScript, and Tailwind CSS.
+LinkedOut was built to help manage hectic LinkedIn inboxes. 
+
+is a modern web application that helps you manage and respond to LinkedIn messages efficiently using AI. Built with Next.js, TypeScript, and Tailwind CSS.
 
 <div align="center">
   <img src="assets/preview.png" alt="LinkedOut Preview" width="100%" />
@@ -14,6 +16,13 @@ LinkedOut is a modern web application that helps you manage and respond to Linke
 - 🎨 Beautiful UI with dark mode support
 - ⚡️ Instant message previews
 - 🔒 Secure authentication
+
+## Known Outscope
+- Logic breaks if you send the first message (no sendee data set in DB)
+- Emoji reactions will not show
+- Group threads do not show (only Classic LinkedIN inbox, no Sales navigator either). Should be easy to tweak.
+- Draft reply only takes previous message (and name) as context. 
+- Text Snippets can be Created/ Updated / Deleted via PocketBase, not yet in-app. 
 
 ## Tech Stack
 
