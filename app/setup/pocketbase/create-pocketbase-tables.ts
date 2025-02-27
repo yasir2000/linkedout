@@ -69,17 +69,18 @@ export async function createPocketbaseTables(
       throw new Error(`Failed to authenticate with PocketBase: ${error.message}`);
     }
     
-    // Call the n8n webhook directly
-    console.log("Calling n8n webhook to create tables...");
-    const webhookUrl = `${process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL}/webhook/linkedout/setup/db-tables`;
-    console.log("Webhook URL:", webhookUrl);
+    // Call the n8n webhook through our API proxy instead of directly
+    console.log("Calling n8n webhook to create tables in PocketBase...");
     
     try {
-      const webhookResponse = await fetch(webhookUrl, {
+      const webhookResponse = await fetch('/api/setup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`
+          'x-service': 'n8n',
+          'x-endpoint': 'webhook/linkedout/setup/tables',
+          'x-n8n-api-key': n8nApiKey,
+          'x-pocketbase-token': authToken
         },
         body: JSON.stringify({
           pocketbaseUrl: process.env.NEXT_PUBLIC_POCKETBASE_URL
@@ -94,11 +95,35 @@ export async function createPocketbaseTables(
         throw new Error(`Failed to create tables in PocketBase (Status: ${webhookResponse.status}): ${errorText}`);
       }
       
+      // Log the raw response for debugging
+      const responseText = await webhookResponse.text();
+      console.log("Raw webhook response:", responseText);
+      
+      // Parse the response
+      let result;
+      try {
+        result = JSON.parse(responseText);
+        console.log("Parsed tables creation result:", result);
+      } catch (parseError) {
+        console.error("Failed to parse webhook response as JSON:", parseError);
+        throw new Error("Failed to parse webhook response as JSON");
+      }
+      
+      // Check if the response indicates success
+      if (result.success || result.response === "success") {
+        console.log("Tables created successfully in PocketBase");
+      } else {
+        console.warn("Warning: success indicator not found in webhook response");
+        console.warn("Response received:", result);
+        throw new Error("Tables creation response did not indicate success");
+      }
+      
       console.log("Successfully created tables in PocketBase");
       return true;
     } catch (error: any) {
       console.error("Error calling webhook:", error);
-      throw new Error(`Failed to call n8n webhook: ${error.message}`);
+      setError(error instanceof Error ? error.message : 'Failed to create tables in PocketBase');
+      return false;
     }
   } catch (error) {
     console.error('Error creating PocketBase tables:', error);

@@ -16,6 +16,7 @@ export async function POST(request: Request) {
     // Handle n8n service
     if (service === 'n8n') {
       const n8nApiKey = request.headers.get('x-n8n-api-key');
+      const pocketbaseToken = request.headers.get('x-pocketbase-token');
       
       if (!n8nApiKey) {
         return NextResponse.json({ error: 'Missing n8n API key' }, { status: 400 });
@@ -23,13 +24,21 @@ export async function POST(request: Request) {
       
       const body = await request.json();
       
+      // Prepare headers for the n8n request
+      const requestHeaders: Record<string, string> = {
+        'X-N8N-API-KEY': n8nApiKey,
+        'Content-Type': 'application/json',
+      };
+      
+      // Add Authorization header if PocketBase token is provided
+      if (pocketbaseToken) {
+        requestHeaders['Authorization'] = `Bearer ${pocketbaseToken}`;
+      }
+      
       // Forward to n8n API
       const response = await fetch(`${process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL}/${endpoint}`, {
         method: 'POST',
-        headers: {
-          'X-N8N-API-KEY': n8nApiKey,
-          'Content-Type': 'application/json',
-        },
+        headers: requestHeaders,
         body: JSON.stringify(body),
       });
       

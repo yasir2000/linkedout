@@ -77,17 +77,18 @@ export async function createServiceAccount(
       throw new Error(`Failed to authenticate with PocketBase: ${error.message}`);
     }
     
-    // Call the n8n webhook directly
+    // Call the n8n webhook through our API proxy instead of directly
     console.log("Calling n8n webhook to create service account and message ingress workflow...");
-    const webhookUrl = `${process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL}/webhook/linkedout/setup/service-user`;
-    console.log("Webhook URL:", webhookUrl);
     
     try {
-      const webhookResponse = await fetch(webhookUrl, {
+      const webhookResponse = await fetch('/api/setup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`
+          'x-service': 'n8n',
+          'x-endpoint': 'webhook/linkedout/setup/service-user',
+          'x-n8n-api-key': n8nApiKey,
+          'x-pocketbase-token': authToken
         },
         body: JSON.stringify({
           pocketbaseUrl: process.env.NEXT_PUBLIC_POCKETBASE_URL,
@@ -98,15 +99,30 @@ export async function createServiceAccount(
       
       console.log("Webhook response status:", webhookResponse.status);
       
-      if (!webhookResponse.ok) {
-        const errorText = await webhookResponse.text();
-        console.error("PocketBase service account creation failed:", errorText);
-        throw new Error(`Failed to create service account in PocketBase (Status: ${webhookResponse.status}): ${errorText}`);
-      }
-      
-      // Log the raw response for debugging
+      // Read the response text only once
       const responseText = await webhookResponse.text();
       console.log("Raw webhook response:", responseText);
+      
+      if (!webhookResponse.ok) {
+        console.error("PocketBase service account creation failed:", responseText);
+        
+        // Try to parse the error response and extract the message
+        try {
+          const errorData = JSON.parse(responseText);
+          // Check if the error is in the format { "response": "Error message here" }
+          if (errorData.response && typeof errorData.response === 'string') {
+            throw new Error(errorData.response);
+          }
+          // Fall back to the standard error message
+          throw new Error(`Failed to create service account in PocketBase (Status: ${webhookResponse.status}): ${responseText}`);
+        } catch (parseError) {
+          // If we can't parse the JSON or there's another error, use the original error text
+          if (parseError instanceof Error && parseError.message !== 'Unexpected token < in JSON at position 0') {
+            throw parseError;
+          }
+          throw new Error(`Failed to create service account in PocketBase (Status: ${webhookResponse.status}): ${responseText}`);
+        }
+      }
       
       // Parse the response
       let result;
@@ -115,17 +131,18 @@ export async function createServiceAccount(
         console.log("Parsed service account creation result:", result);
       } catch (parseError) {
         console.error("Failed to parse webhook response as JSON:", parseError);
-        console.log("Using default credentials since response couldn't be parsed");
-        result = {};
+        throw new Error("Failed to parse webhook response as JSON");
       }
       
       // Check if the expected fields are present
       if (!result.serviceUsername) {
         console.warn("Warning: serviceUsername not found in webhook response");
+        throw new Error("Service username not found in response");
       }
       
       if (!result.servicePassword) {
         console.warn("Warning: servicePassword not found in webhook response");
+        throw new Error("Service password not found in response");
       }
       
       if (result.workflowCreated) {
@@ -135,10 +152,9 @@ export async function createServiceAccount(
       }
       
       // Extract credentials from response using the correct field names
-      // Fall back to default values if not provided
       const credentials: ServiceAccountCredentials = {
-        PocketBaseServiceUsername: result.serviceUsername || "service_account@example.com",
-        PocketBaseServicePassword: result.servicePassword || "placeholder_password"
+        PocketBaseServiceUsername: result.serviceUsername,
+        PocketBaseServicePassword: result.servicePassword
       };
       
       console.log("Using credentials:", {
@@ -147,40 +163,26 @@ export async function createServiceAccount(
       });
       
       // Store the credentials
-      try {
-        setCredentials(credentials);
-        console.log("Credentials stored successfully");
-      } catch (credError: any) {
-        console.error("Error storing credentials:", credError);
-        console.log("Continuing with default credentials");
-        // Continue anyway since we have the credentials
-      }
+      setCredentials(credentials);
+      console.log("Credentials stored successfully");
       
       console.log("Successfully created service account in PocketBase and message ingress workflow in n8n");
       return true;
     } catch (error: any) {
       console.error("Error calling webhook:", error);
-      
-      // Use default credentials as a fallback
-      console.log("Using default credentials due to webhook error");
-      const defaultCredentials: ServiceAccountCredentials = {
-        PocketBaseServiceUsername: "service_account@example.com",
-        PocketBaseServicePassword: "placeholder_password"
-      };
-      
-      try {
-        setCredentials(defaultCredentials);
-        console.log("Default credentials stored successfully");
-      } catch (credError: any) {
-        console.error("Error storing default credentials:", credError);
-      }
-      
-      // Return true to allow the setup to continue
-      return true;
+      setError(error instanceof Error ? error.message : 'Failed to create service account');
+      return false;
     }
   } catch (error) {
     console.error('Error creating PocketBase service account and message ingress workflow:', error);
-    setError(error instanceof Error ? error.message : 'Failed to create service account in PocketBase and message ingress workflow in n8n');
+    
+    // Only set a generic error if no specific error has been set yet
+    if (error instanceof Error && !error.message.includes('Failed to create service account in PocketBase')) {
+      setError(error.message);
+    } else if (!(error instanceof Error)) {
+      setError('Failed to create service account in PocketBase and message ingress workflow in n8n');
+    }
+    
     return false;
   }
 }
