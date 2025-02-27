@@ -51,11 +51,10 @@ function MessageGroup({ message }: { message: Message }) {
             onError={(e) => {
               e.currentTarget.onerror = null;
               e.currentTarget.style.display = 'none';
-              e.currentTarget.parentElement!.innerHTML = `
-                <div class="w-14 h-14 rounded-full flex items-center justify-center text-xl font-medium border-2 bg-background text-foreground border-border">
-                  ${initial}
-                </div>
-              `;
+              const fallbackDiv = document.createElement('div');
+              fallbackDiv.className = 'w-14 h-14 rounded-full flex items-center justify-center text-xl font-medium border-2 bg-background text-foreground border-border';
+              fallbackDiv.textContent = initial;
+              e.currentTarget.parentElement?.replaceChildren(fallbackDiv);
             }}
           />
         ) : (

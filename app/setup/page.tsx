@@ -3,15 +3,9 @@
 
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-// Remove the auth import if it exists
-// import { useAuth } from '@/app/contexts/auth-context';
 
 export default function SetupPage() {
   const router = useRouter();
-  // Remove any auth-related code
-  // const { token } = useAuth();
-  
-  // Remove any useEffect that redirects to login
   
   return (
     <div className="border border-border rounded-lg p-8 bg-background">
@@ -26,7 +20,7 @@ export default function SetupPage() {
           className="w-full"
           onClick={() => router.push('/setup/details')}
         >
-          I used the Cloud Station deployment template
+          I used the CloudStation deployment template
         </Button>
         
         <Button 

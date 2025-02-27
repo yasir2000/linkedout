@@ -57,13 +57,14 @@ async function generateDraft(
   token: string
 ): Promise<{ draftReply: string }> {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL}/linkedout/generate-draft`, {
+    const response = await fetch('/api/proxy', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
+        'x-endpoint': 'linkedout/generate-draft'
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(data)
     });
     
     const result = await response.json();
