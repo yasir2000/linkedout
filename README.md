@@ -1,12 +1,10 @@
 # LinkedOut - AI-Powered LinkedIn Inbox
-
-LinkedOut was built to help manage hectic LinkedIn inboxes. 
-
-is a modern web application that helps you manage and respond to LinkedIn messages efficiently using AI. Built with Next.js, TypeScript, and Tailwind CSS.
-
 <div align="center">
   <img src="assets/linkedout-hero-optimizied.png" alt="LinkedOut Preview" width="100%" />
 </div>
+
+LinkedOut was built to help manage hectic LinkedIn inboxes on mobile and desktop. It includes AI draft replies, text snippets library. Front-end built with Next.js, TypeScript, and Tailwind CSS. Backend runs on n8n and PocketBase.
+
 
 ## Features
 
