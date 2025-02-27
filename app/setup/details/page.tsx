@@ -13,6 +13,8 @@ const formSchema = z.object({
   n8nApiKey: z.string().min(1, "n8n API Key is required"),
   unipileApiKey: z.string().min(1, "Unipile API Key is required"),
   unipileDsn: z.string().min(1, "Unipile DSN is required"),
+  pocketbaseSuperuserEmail: z.string().email("Invalid email address").min(1, "PocketBase Superuser Email is required"),
+  pocketbaseSuperuserPassword: z.string().min(1, "PocketBase Superuser Password is required"),
 });
 
 export default function DetailsPage() {
@@ -22,6 +24,8 @@ export default function DetailsPage() {
     n8nApiKey, setN8nApiKey,
     unipileApiKey, setUnipileApiKey,
     unipileDsn, setUnipileDsn,
+    pocketbaseSuperuserEmail, setPocketbaseSuperuserEmail,
+    pocketbaseSuperuserPassword, setPocketbaseSuperuserPassword,
     goToNextStep
   } = useSetup();
   
@@ -29,6 +33,8 @@ export default function DetailsPage() {
     n8nApiKey?: string;
     unipileApiKey?: string;
     unipileDsn?: string;
+    pocketbaseSuperuserEmail?: string;
+    pocketbaseSuperuserPassword?: string;
   }>({});
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,7 +44,9 @@ export default function DetailsPage() {
       formSchema.parse({
         n8nApiKey,
         unipileApiKey,
-        unipileDsn
+        unipileDsn,
+        pocketbaseSuperuserEmail,
+        pocketbaseSuperuserPassword
       });
       setErrors({});
       return true;
@@ -86,8 +94,8 @@ export default function DetailsPage() {
       <h1 className="text-2xl font-bold mb-4">Add stack details</h1>
       
       <p className="text-muted-foreground mb-6">
-        This app connects to n8n and PocketBase, setting up workflows, credentials, and tables via
-        API. Your API keys stay secure—never sent to external servers.
+        This app connects to your n8n and PocketBase, setting up workflows, credentials, and tables via
+        API. There is no "phone home", none of your infos are sent to us 🤓
       </p>
       
       <div className="space-y-6">
@@ -106,7 +114,7 @@ export default function DetailsPage() {
           )}
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-6">
           <div>
             <label className="block text-sm font-medium mb-2">
               Unipile API key
@@ -137,6 +145,42 @@ export default function DetailsPage() {
             )}
           </div>
         </div>
+        
+        <div className="border-t pt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                PocketBase Superuser Email
+              </label>
+              <Input
+                type="email"
+                value={pocketbaseSuperuserEmail}
+                onChange={(e) => setPocketbaseSuperuserEmail(e.target.value)}
+                placeholder="e.g. admin@example.com"
+                className={`w-full ${errors.pocketbaseSuperuserEmail ? 'border-destructive' : ''}`}
+              />
+              {errors.pocketbaseSuperuserEmail && (
+                <p className="text-sm text-destructive mt-1">{errors.pocketbaseSuperuserEmail}</p>
+              )}
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                PocketBase Superuser Password
+              </label>
+              <Input
+                type="password"
+                value={pocketbaseSuperuserPassword}
+                onChange={(e) => setPocketbaseSuperuserPassword(e.target.value)}
+                placeholder="Your PocketBase admin password"
+                className={`w-full ${errors.pocketbaseSuperuserPassword ? 'border-destructive' : ''}`}
+              />
+              {errors.pocketbaseSuperuserPassword && (
+                <p className="text-sm text-destructive mt-1">{errors.pocketbaseSuperuserPassword}</p>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
       
       <div className="flex justify-between mt-16">
@@ -145,7 +189,8 @@ export default function DetailsPage() {
         </Button>
         <Button 
           onClick={handleContinue}
-          disabled={isSubmitting || !n8nApiKey || !unipileApiKey || !unipileDsn}
+          disabled={isSubmitting || !n8nApiKey || !unipileApiKey || !unipileDsn || 
+                   !pocketbaseSuperuserEmail || !pocketbaseSuperuserPassword}
         >
           {isSubmitting ? 'Saving...' : 'Continue'}
         </Button>

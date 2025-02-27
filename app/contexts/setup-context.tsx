@@ -11,6 +11,10 @@ interface SetupContextType {
   setUnipileApiKey: (value: string) => void;
   unipileDsn: string;
   setUnipileDsn: (value: string) => void;
+  pocketbaseSuperuserEmail: string;
+  setPocketbaseSuperuserEmail: (value: string) => void;
+  pocketbaseSuperuserPassword: string;
+  setPocketbaseSuperuserPassword: (value: string) => void;
   
   // Step 2: n8n
   n8nSetupComplete: boolean;
@@ -20,9 +24,14 @@ interface SetupContextType {
   manualSetupComplete: boolean;
   setManualSetupComplete: (value: boolean) => void;
   
-  // Step 4: PocketBase
+  // Step 3: PocketBase
   pocketbaseSetupComplete: boolean;
   setPocketbaseSetupComplete: (value: boolean) => void;
+  pocketbaseServiceUsername: string;
+  setPocketbaseServiceUsername: (value: string) => void;
+  pocketbaseServicePassword: string;
+  setPocketbaseServicePassword: (value: string) => void;
+  
   
   // Navigation
   currentStep: number;
@@ -38,6 +47,8 @@ export function SetupProvider({ children }: { children: ReactNode }) {
   const [n8nApiKey, setN8nApiKey] = useState('');
   const [unipileApiKey, setUnipileApiKey] = useState('');
   const [unipileDsn, setUnipileDsn] = useState('');
+  const [pocketbaseSuperuserEmail, setPocketbaseSuperuserEmail] = useState('');
+  const [pocketbaseSuperuserPassword, setPocketbaseSuperuserPassword] = useState('');
   
   // Step 2: n8n
   const [n8nSetupComplete, setN8nSetupComplete] = useState(false);
@@ -47,6 +58,9 @@ export function SetupProvider({ children }: { children: ReactNode }) {
   
   // Step 4: PocketBase
   const [pocketbaseSetupComplete, setPocketbaseSetupComplete] = useState(false);
+  const [pocketbaseServiceUsername, setPocketbaseServiceUsername] = useState('');
+  const [pocketbaseServicePassword, setPocketbaseServicePassword] = useState('');
+  
   
   // Navigation
   const [currentStep, setCurrentStep] = useState(1);
@@ -68,12 +82,20 @@ export function SetupProvider({ children }: { children: ReactNode }) {
         setUnipileApiKey,
         unipileDsn,
         setUnipileDsn,
+        pocketbaseSuperuserEmail,
+        setPocketbaseSuperuserEmail,
+        pocketbaseSuperuserPassword,
+        setPocketbaseSuperuserPassword,
         n8nSetupComplete,
         setN8nSetupComplete,
         manualSetupComplete,
         setManualSetupComplete,
         pocketbaseSetupComplete,
         setPocketbaseSetupComplete,
+        pocketbaseServiceUsername,
+        setPocketbaseServiceUsername,
+        pocketbaseServicePassword,
+        setPocketbaseServicePassword,
         currentStep,
         setCurrentStep,
         goToNextStep,
