@@ -104,10 +104,11 @@ export default function InboxPage() {
 
     try {
       const response = await fetch('/api/proxy?endpoint=linkout_messages', {
+        method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+          'Content-Type': 'application/json'
+        }
       });
       
       if (response.status === 401) {
@@ -121,8 +122,15 @@ export default function InboxPage() {
 
       const data = await response.json();
       
-      const sortedMessages = data
-        .filter((msg: Message) => msg.content !== null)
+      // Handle empty or null response
+      if (!data) {
+        setMessages([]);
+        setIsLoading(false);
+        return;
+      }
+      
+      const sortedMessages = (Array.isArray(data) ? data : [])
+        .filter((msg: Message) => msg?.content !== null)
         .sort((a: Message, b: Message) => 
           new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
         );

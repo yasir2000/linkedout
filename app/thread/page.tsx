@@ -426,7 +426,7 @@ export default function ThreadPage() {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
-          'x-endpoint': 'messages',
+          'x-endpoint': 'linkout_messages'
         },
         body: JSON.stringify({
           content: reply,
