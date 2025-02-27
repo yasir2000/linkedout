@@ -9,8 +9,8 @@ export async function addUnipileCredential(
       console.log("Creating Unipile credential in n8n...");
       
       const credentialData = {
-        name: "Unipile - LinkedIn API",
-        type: "headerAuth",
+        name: "Unipile [LinkedIn API]",
+        type: "httpHeaderAuth",
         data: {
           name: "X-API-KEY",
           value: unipileApiKey
