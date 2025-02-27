@@ -24,7 +24,7 @@ export async function POST(request: Request) {
       const body = await request.json();
       
       // Forward to n8n API
-      const response = await fetch(`${process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL}/${endpoint}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL}/webhook/${endpoint}`, {
         method: 'POST',
         headers: {
           'X-N8N-API-KEY': n8nApiKey,
