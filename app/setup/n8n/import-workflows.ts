@@ -17,7 +17,7 @@ export async function importWorkflows(
     const workflows = [
       { name: "Inbox Backend", filename: "inbox-backend" },
       { name: "Thread Backend", filename: "thread-backend" },
-      { name: "New Message Ingress", filename: "new-message-ingress" },
+      //{ name: "New Message Ingress", filename: "new-message-ingress" },
       { name: "Setup Workflow", filename: "setup-workflow" }
     ];
     
@@ -42,7 +42,19 @@ export async function importWorkflows(
           throw new Error(`Failed to load workflow file: ${workflow.filename}.json (Status: ${response.status})`);
         }
         
-        let workflowData = await response.json();
+        let workflowData;
+        
+        try {
+          workflowData = await response.json();
+        } catch (parseError) {
+          console.error(`Error parsing JSON for workflow ${workflow.name}:`, parseError);
+          
+          // Try to get the text and log it for debugging
+          const text = await response.text().catch(() => "Could not get response text");
+          console.error(`Raw response for ${workflow.filename}.json:`, text);
+          
+          throw new Error(`Invalid JSON in workflow file: ${workflow.filename}.json`);
+        }
         
         // Convert workflow to string for replacements
         let workflowStr = JSON.stringify(workflowData);
@@ -53,7 +65,12 @@ export async function importWorkflows(
         }
         
         // Parse back to object
-        workflowData = JSON.parse(workflowStr);
+        try {
+          workflowData = JSON.parse(workflowStr);
+        } catch (parseError) {
+          console.error(`Error parsing JSON after replacements for workflow ${workflow.name}:`, parseError);
+          throw new Error(`Failed to process workflow after replacements: ${workflow.filename}.json`);
+        }
         
         // Create a clean workflow object
         const cleanWorkflow = {
@@ -83,9 +100,21 @@ export async function importWorkflows(
         });
         
         if (!importResponse.ok) {
-          const errorData = await importResponse.json().catch(() => ({}));
-          console.error(`Failed to import workflow ${workflow.name}:`, errorData);
-          throw new Error(errorData.message || `Failed to import workflow: ${workflow.name}`);
+          const errorText = await importResponse.text();
+          let errorMessage = `Failed to import workflow: ${workflow.name}`;
+          
+          try {
+            const errorData = JSON.parse(errorText);
+            if (errorData.message) {
+              errorMessage = errorData.message;
+            }
+          } catch (e) {
+            // If we can't parse the error as JSON, use the raw text
+            errorMessage = `${errorMessage} - ${errorText}`;
+          }
+          
+          console.error(`Failed to import workflow ${workflow.name}:`, errorMessage);
+          throw new Error(errorMessage);
         }
         
         console.log(`Successfully imported workflow: ${workflow.name}`);
