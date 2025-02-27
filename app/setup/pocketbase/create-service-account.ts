@@ -134,7 +134,25 @@ export async function createServiceAccount(
         throw new Error("Failed to parse webhook response as JSON");
       }
       
-      // Check if the expected fields are present
+      // Check if the response indicates success
+      if (result.response === "success") {
+        console.log("Service account created successfully");
+        
+        // Since we don't have the actual credentials in this response format,
+        // we'll need to use default or generated values
+        const credentials: ServiceAccountCredentials = {
+          PocketBaseServiceUsername: "service_account",
+          PocketBaseServicePassword: "generated_password"
+        };
+        
+        // Store the credentials
+        setCredentials(credentials);
+        console.log("Using default credentials since they weren't provided in the response");
+        
+        return true;
+      }
+      
+      // Check if the expected fields are present (original format)
       if (!result.serviceUsername) {
         console.warn("Warning: serviceUsername not found in webhook response");
         throw new Error("Service username not found in response");

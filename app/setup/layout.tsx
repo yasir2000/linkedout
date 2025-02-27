@@ -34,6 +34,24 @@ const pathToStep: Record<string, number> = {
   '/setup/manual': 3, // Alternative to n8n
 };
 
+function getProgress(pathname: string): number {
+  const setupSteps = [
+    '/setup/details',
+    '/setup/n8n',
+    '/setup/pocketbase',
+    '/setup/review'
+  ];
+  
+  const currentStepIndex = setupSteps.findIndex(step => pathname.startsWith(step));
+  
+  if (currentStepIndex === -1) {
+    return 0;
+  }
+  
+  // Calculate progress based on current step (25% per step)
+  return Math.min(100, ((currentStepIndex + 1) / setupSteps.length) * 100);
+}
+
 function SetupLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { setCurrentStep } = useSetup();
