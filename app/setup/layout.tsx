@@ -35,26 +35,32 @@ const pathToStep: Record<string, number> = {
 };
 
 function getProgress(pathname: string): number {
-  const setupSteps = [
-    '/setup/details',
-    '/setup/n8n',
-    '/setup/pocketbase',
-    '/setup/review'
-  ];
+  // Map paths to specific progress percentages
+  const pathProgressMap: Record<string, number> = {
+    '/setup/details': 20,
+    '/setup/n8n': 40, 
+    '/setup/manual': 40, // Added manual path with 40% progress
+    '/setup/pocketbase': 60,
+    '/setup/review': 100
+  };
   
-  const currentStepIndex = setupSteps.findIndex(step => pathname.startsWith(step));
-  
-  if (currentStepIndex === -1) {
-    return 0;
+  // Find the matching path
+  for (const [path, progress] of Object.entries(pathProgressMap)) {
+    if (pathname.startsWith(path)) {
+      return progress;
+    }
   }
   
-  // Calculate progress based on current step (25% per step)
-  return Math.min(100, ((currentStepIndex + 1) / setupSteps.length) * 100);
+  // Default progress for other paths
+  return 0;
 }
 
 function SetupLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { setCurrentStep } = useSetup();
+  
+  // Hide progress bar on the root setup page
+  const showProgressBar = pathname !== '/setup';
   
   useEffect(() => {
     if (pathname && pathname in pathToStep) {
@@ -66,7 +72,7 @@ function SetupLayoutContent({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto py-6 max-w-4xl">
         <h1 className="text-xl font-semibold mb-4">Set up LinkedOut</h1>
-        <SetupProgress />
+        {showProgressBar && <SetupProgress />}
         {children}
       </div>
     </div>

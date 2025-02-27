@@ -20,8 +20,18 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
+      // First, perform the normal login
       await login(email, password);
-      router.push('/inbox');
+      
+      // Then check if setup is complete by looking for the service user
+      const isSetupComplete = await checkSetupComplete();
+      
+      // Redirect based on setup status
+      if (isSetupComplete) {
+        router.push('/inbox');
+      } else {
+        router.push('/setup');
+      }
     } catch (error) {
       toast({
         title: 'Error',
@@ -30,6 +40,41 @@ export default function LoginPage() {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+  
+  // Function to check if the service user exists using direct API call
+  const checkSetupComplete = async (): Promise<boolean> => {
+    try {
+      const pocketbaseUrl = process.env.NEXT_PUBLIC_POCKETBASE_URL;
+      const serviceUserEmail = 'linkedout-service-user@n8n.io';
+      
+      // Get the token from localStorage after login
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        console.error('No auth token found');
+        return true; // Default to inbox if we can't check
+      }
+      
+      // Use the token to check if the service user exists
+      const response = await fetch(`${pocketbaseUrl}/api/collections/users/records?filter=(email='${serviceUserEmail}')&fields=id,email`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        console.error('Failed to check for service user');
+        return true; // Default to inbox if we can't check
+      }
+      
+      const data = await response.json();
+      return data.totalItems > 0;
+    } catch (error) {
+      console.error('Error checking setup status:', error);
+      // If we can't check, assume setup is complete
+      return true;
     }
   };
 
