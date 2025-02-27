@@ -135,9 +135,11 @@ export default function InboxPage() {
         );
 
       setMessages(sortedMessages);
+      setError(null);
       setIsLoading(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch messages');
+      setIsLoading(false);
     }
   };
 

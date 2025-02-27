@@ -16,14 +16,18 @@ export async function importWorkflows(
     // Define workflows to import with their names
     const workflows = [
       { name: "Inbox Backend", filename: "inbox-backend" },
-      // { name: "Thread Backend", filename: "thread-backend" },
-      // { name: "New Message Ingress", filename: "new-message-ingress" }
+      { name: "Thread Backend", filename: "thread-backend" },
+      { name: "New Message Ingress", filename: "new-message-ingress" },
+      { name: "Setup Workflow", filename: "setup-workflow" }
     ];
     
     // Define replacements map (easy to extend in the future)
     const replacements = {
       "****POCKETBASE_BASE_URL****": process.env.NEXT_PUBLIC_POCKETBASE_URL || "",
-      "****UNIPILE_CREDENTIAL_ID****": unipileCredentialId
+      "****UNIPILE_CREDENTIAL_ID****": unipileCredentialId,
+      "****UNIPILE_DSN_URL****": process.env.UNIPILE_DSN_URL || "",
+      "****POCKETBASE_SERVICE_USER_EMAIL****": process.env.POCKETBASE_SERVICE_USER_EMAIL || "",
+      "****POCKETBASE_SERVICE_USER_PASSWORD****": process.env.POCKETBASE_SERVICE_USER_PASSWORD || ""
     };
     
     // Import each workflow

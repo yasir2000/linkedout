@@ -18,7 +18,7 @@ export default function ReviewPage() {
   }, []);
 
   const handleOpenLinkedOut = () => {
-    router.push('/signin');
+    router.push('/inbox');
   };
 
   return (
