@@ -11,6 +11,7 @@ export async function createServiceAccount(
   pocketbaseSuperuserEmail: string,
   pocketbaseSuperuserPassword: string,
   unipileCredentialId: string | null,
+  unipileDsn: string | null,
   setError: (error: string | null) => void,
   setCredentials: (credentials: ServiceAccountCredentials) => void
 ): Promise<boolean> {
@@ -90,7 +91,8 @@ export async function createServiceAccount(
         },
         body: JSON.stringify({
           pocketbaseUrl: process.env.NEXT_PUBLIC_POCKETBASE_URL,
-          unipileCredentialId: unipileCredentialId || ""
+          unipileCredentialId: unipileCredentialId || "",
+          unipileDsn: unipileDsn || ""
         })
       });
       

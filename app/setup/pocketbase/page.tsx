@@ -17,11 +17,15 @@ export default function PocketbaseSetupPage() {
   const { 
     n8nApiKey, 
     unipileApiKey,
+    unipileDsn,
     pocketbaseSuperuserEmail,
     pocketbaseSuperuserPassword,
     setPocketbaseServiceUsername,
     setPocketbaseServicePassword,
-    goToNextStep
+    setPocketbaseSetupComplete,
+    goToNextStep,
+    currentStep,
+    pocketbaseSetupComplete
   } = useSetup();
   
   const [status, setStatus] = useState<SetupStatus>('idle');
@@ -29,20 +33,44 @@ export default function PocketbaseSetupPage() {
   
   // Setup steps
   const [tablesStatus, setTablesStatus] = useState<SetupStatus>('idle');
-  const [serviceAccountAndWorkflowStatus, setServiceAccountAndWorkflowStatus] = useState<SetupStatus>('idle');
+  const [serviceAccountStatus, setServiceAccountStatus] = useState<SetupStatus>('idle');
   
   // Add a ref to track if setup has been initiated
   const setupInitiatedRef = useRef(false);
+  // Add a ref to track if setup has been completed
+  const setupCompletedRef = useRef(false);
   
   useEffect(() => {
-    // Start setup automatically when the page loads, but only if not already initiated
-    if (status === 'idle' && n8nApiKey && pocketbaseSuperuserEmail && pocketbaseSuperuserPassword && !setupInitiatedRef.current) {
+    // If we're on a step after PocketBase setup AND pocketbase setup is marked complete in context
+    if (currentStep > 2 && pocketbaseSetupComplete) {
+      setupCompletedRef.current = true;
+      setStatus('success');
+      setTablesStatus('success');
+      setServiceAccountStatus('success');
+      return;
+    }
+    
+    // Add !setupCompletedRef.current check
+    if (
+      status === 'idle' && 
+      !setupInitiatedRef.current && 
+      !setupCompletedRef.current && 
+      n8nApiKey && 
+      pocketbaseSuperuserEmail && 
+      pocketbaseSuperuserPassword
+    ) {
       setupInitiatedRef.current = true;
       handleSetup();
     }
-  }, []);
+  }, [currentStep, pocketbaseSetupComplete]);
   
   const handleSetup = async () => {
+    // Don't restart if already completed
+    if (setupCompletedRef.current) {
+      console.log('Setup already completed, not restarting');
+      return;
+    }
+    
     // Prevent multiple simultaneous setup attempts
     if (setupInitiatedRef.current && status === 'loading') {
       console.log('Setup already in progress, ignoring duplicate request');
@@ -77,7 +105,7 @@ export default function PocketbaseSetupPage() {
       }
       
       // Step 2: Create service account in PocketBase and message ingress workflow in n8n
-      setServiceAccountAndWorkflowStatus('loading');
+      setServiceAccountStatus('loading');
       let serviceUsername = '';
       let servicePassword = '';
       
@@ -89,6 +117,7 @@ export default function PocketbaseSetupPage() {
         pocketbaseSuperuserEmail,
         pocketbaseSuperuserPassword,
         unipileCredentialId,
+        unipileDsn,
         setError,
         (credentials) => {
           serviceUsername = credentials.PocketBaseServiceUsername;
@@ -100,7 +129,7 @@ export default function PocketbaseSetupPage() {
         }
       );
       await new Promise(resolve => setTimeout(resolve, 500));
-      setServiceAccountAndWorkflowStatus(serviceAccountResult ? 'success' : 'error');
+      setServiceAccountStatus(serviceAccountResult ? 'success' : 'error');
       
       if (!serviceAccountResult) {
         throw new Error('Failed to create service account in PocketBase and message ingress workflow in n8n');
@@ -108,6 +137,8 @@ export default function PocketbaseSetupPage() {
       
       // All steps completed successfully
       setStatus('success');
+      setupCompletedRef.current = true;
+      setPocketbaseSetupComplete(true);
       
       toast({
         title: "PocketBase setup complete",
@@ -132,8 +163,9 @@ export default function PocketbaseSetupPage() {
   const handleRetry = () => {
     // Reset the setup initiated flag to allow retry
     setupInitiatedRef.current = false;
+    setupCompletedRef.current = false;
     setTablesStatus('idle');
-    setServiceAccountAndWorkflowStatus('idle');
+    setServiceAccountStatus('idle');
     handleSetup();
   };
   
@@ -179,7 +211,7 @@ export default function PocketbaseSetupPage() {
             <h3 className="font-medium">Create service account and message ingress workflow</h3>
             <p className="text-sm text-muted-foreground">Creating a service account for n8n and setting up the workflow to handle new LinkedIn messages</p>
           </div>
-          {renderStatusIcon(serviceAccountAndWorkflowStatus)}
+          {renderStatusIcon(serviceAccountStatus)}
         </div>
       </div>
       
@@ -205,7 +237,7 @@ export default function PocketbaseSetupPage() {
             </Button>
           )}
           
-          {status === 'success' ? (
+          {(status === 'success' || setupCompletedRef.current) ? (
             <Button onClick={handleContinue}>
               Continue
             </Button>
@@ -218,7 +250,7 @@ export default function PocketbaseSetupPage() {
             </Button>
           )}
           
-          {status === 'idle' && !setupInitiatedRef.current && (
+          {status === 'idle' && !setupInitiatedRef.current && !setupCompletedRef.current && (
             <Button onClick={handleSetup}>
               Start Setup
             </Button>

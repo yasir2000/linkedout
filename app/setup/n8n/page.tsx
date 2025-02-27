@@ -1,15 +1,16 @@
 // app/setup/n8n/page.tsx
 'use client';
 
-import { useState, useEffect, useRef } from 'react'; // Add useRef
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useSetup } from '@/app/contexts/setup-context';
 import { useToast } from '@/hooks/use-toast';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
-import { addUnipileCredential } from './add-unipile-credential';
+import { addUnipileCredential } from './add-unipile-credential'; // Changed from create-unipile-credential
 import { importWorkflows } from './import-workflows';
 import { SetupStatus } from './types';
+
 
 export default function N8nSetupPage() {
   const router = useRouter();
@@ -18,7 +19,10 @@ export default function N8nSetupPage() {
     n8nApiKey, 
     unipileApiKey, 
     unipileDsn,
-    goToNextStep
+    goToNextStep,
+    currentStep,
+    setN8nSetupComplete,
+    n8nSetupComplete
   } = useSetup();
   
   const [status, setStatus] = useState<SetupStatus>('idle');
@@ -30,16 +34,39 @@ export default function N8nSetupPage() {
   
   // Add a ref to track if setup has been initiated
   const setupInitiatedRef = useRef(false);
+  const setupCompletedRef = useRef(false);
   
   useEffect(() => {
-    // Start setup automatically when the page loads, but only if not already initiated
-    if (status === 'idle' && n8nApiKey && unipileApiKey && unipileDsn && !setupInitiatedRef.current) {
+    // If we're on a step after n8n setup OR n8n setup is marked complete in context
+    if (currentStep > 1 && n8nSetupComplete) {
+      setupCompletedRef.current = true;
+      setStatus('success');
+      setUnipileCredentialStatus('success');
+      setWorkflowsStatus('success');
+      return;
+    }
+    
+    // Add !setupCompletedRef.current check
+    if (
+      status === 'idle' && 
+      !setupInitiatedRef.current && 
+      !setupCompletedRef.current && 
+      n8nApiKey && 
+      unipileApiKey && 
+      unipileDsn
+    ) {
       setupInitiatedRef.current = true;
       handleSetup();
     }
-  }, []);
+  }, [currentStep, n8nSetupComplete]);
   
   const handleSetup = async () => {
+    // Don't restart if already completed
+    if (setupCompletedRef.current) {
+      console.log('Setup already completed, not restarting');
+      return;
+    }
+    
     // Prevent multiple simultaneous setup attempts
     if (setupInitiatedRef.current && status === 'loading') {
       console.log('Setup already in progress, ignoring duplicate request');
@@ -100,6 +127,9 @@ export default function N8nSetupPage() {
       // Only update the step counter, but don't navigate automatically
       goToNextStep();
       
+      setupCompletedRef.current = true;
+      setN8nSetupComplete(true);
+      
     } catch (err) {
       setStatus('error');
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
@@ -113,8 +143,8 @@ export default function N8nSetupPage() {
   };
   
   const handleRetry = () => {
-    // Reset the setup initiated flag to allow retry
     setupInitiatedRef.current = false;
+    setupCompletedRef.current = false;
     setUnipileCredentialStatus('idle');
     setWorkflowsStatus('idle');
     handleSetup();
@@ -194,7 +224,7 @@ export default function N8nSetupPage() {
             </Button>
           )}
           
-          {status === 'success' ? (
+          {(status === 'success' || setupCompletedRef.current) ? (
             <Button onClick={handleContinue}>
               Continue
             </Button>
@@ -207,7 +237,7 @@ export default function N8nSetupPage() {
             </Button>
           )}
           
-          {status === 'idle' && !setupInitiatedRef.current && (
+          {status === 'idle' && !setupInitiatedRef.current && !setupCompletedRef.current && (
             <Button onClick={handleSetup}>
               Start Setup
             </Button>
