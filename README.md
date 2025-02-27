@@ -91,6 +91,7 @@ LinkedOut is a modern web application that helps you manage and respond to Linke
 | `NEXT_PUBLIC_N8N_WEBHOOK_URL` | N8N URL | Yes |
 | `NEXT_PUBLIC_POCKETBASE_URL` | PocketBase URL | Yes |
 
+
 ---
 
 <div align="center">
