@@ -4,7 +4,8 @@ import { SetupStatus } from './types';
 export async function importWorkflows(
   n8nApiKey: string,
   unipileCredentialId: string | null,
-  setError: (error: string | null) => void
+  setError: (error: string | null) => void,
+  unipileDsn: string | null = null // Add unipileDsn parameter with default value
 ): Promise<boolean> {
   try {
     console.log("Importing workflows to n8n...");
@@ -15,20 +16,39 @@ export async function importWorkflows(
     
     // Define workflows to import with their names
     const workflows = [
-      { name: "Inbox Backend", filename: "inbox-backend" },
-      { name: "Thread Backend", filename: "thread-backend" },
+      { name: "/inbox backend [linkedout]", filename: "inbox-backend" },
+      { name: "/thread backend [linkedout]", filename: "thread-backend" },
       //{ name: "New Message Ingress", filename: "new-message-ingress" },
-      { name: "Setup Workflow", filename: "setup-workflow" }
+      { name: "/setup backend [linkedout]", filename: "setup-workflow" }
     ];
+    
+    // Use the passed unipileDsn parameter if available, otherwise fall back to env variable
+    let unipileDsnUrl = unipileDsn || process.env.UNIPILE_DSN_URL || "";
+    
+    // Ensure the DSN URL starts with https:// if it doesn't already
+    if (unipileDsnUrl && !unipileDsnUrl.startsWith('https://') && !unipileDsnUrl.startsWith('http://')) {
+      unipileDsnUrl = `https://${unipileDsnUrl}`;
+    }
+    
+    console.log("Using Unipile DSN URL for replacements:", unipileDsnUrl);
     
     // Define replacements map (easy to extend in the future)
     const replacements = {
       "****POCKETBASE_BASE_URL****": process.env.NEXT_PUBLIC_POCKETBASE_URL || "",
       "****UNIPILE_CREDENTIAL_ID****": unipileCredentialId,
-      "****UNIPILE_DSN_URL****": process.env.UNIPILE_DSN_URL || "",
+      "****UNIPILE_DSN_URL****": unipileDsnUrl,
       "****POCKETBASE_SERVICE_USER_EMAIL****": process.env.POCKETBASE_SERVICE_USER_EMAIL || "",
       "****POCKETBASE_SERVICE_USER_PASSWORD****": process.env.POCKETBASE_SERVICE_USER_PASSWORD || ""
     };
+    
+    // Log all replacements (excluding sensitive data)
+    console.log("Replacement values:", {
+      "POCKETBASE_BASE_URL": process.env.NEXT_PUBLIC_POCKETBASE_URL || "",
+      "UNIPILE_CREDENTIAL_ID": unipileCredentialId,
+      "UNIPILE_DSN_URL": unipileDsnUrl,
+      "POCKETBASE_SERVICE_USER_EMAIL": process.env.POCKETBASE_SERVICE_USER_EMAIL || "",
+      "POCKETBASE_SERVICE_USER_PASSWORD": "***REDACTED***"
+    });
     
     // Import each workflow
     for (const workflow of workflows) {
@@ -117,14 +137,54 @@ export async function importWorkflows(
           throw new Error(errorMessage);
         }
         
-        console.log(`Successfully imported workflow: ${workflow.name}`);
+        // Get the workflow ID from the response
+        const importData = await importResponse.json();
+        const workflowId = importData.id;
+        
+        if (!workflowId) {
+          console.error(`No workflow ID returned for ${workflow.name}`);
+          throw new Error(`Failed to get workflow ID for: ${workflow.name}`);
+        }
+        
+        // Activate the workflow using the n8n API
+        console.log(`Activating workflow: ${workflow.name} (ID: ${workflowId})`);
+        const activateResponse = await fetch('/api/setup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-service': 'n8n',
+            'x-endpoint': `api/v1/workflows/${workflowId}/activate`,
+            'x-n8n-api-key': n8nApiKey
+          },
+          body: JSON.stringify({}),
+        });
+        
+        if (!activateResponse.ok) {
+          const errorText = await activateResponse.text();
+          let errorMessage = `Failed to activate workflow: ${workflow.name}`;
+          
+          try {
+            const errorData = JSON.parse(errorText);
+            if (errorData.message) {
+              errorMessage = errorData.message;
+            }
+          } catch (e) {
+            // If we can't parse the error as JSON, use the raw text
+            errorMessage = `${errorMessage} - ${errorText}`;
+          }
+          
+          console.error(`Failed to activate workflow ${workflow.name}:`, errorMessage);
+          throw new Error(errorMessage);
+        }
+        
+        console.log(`Successfully imported and activated workflow: ${workflow.name}`);
       } catch (error) {
         console.error(`Error importing workflow ${workflow.name}:`, error);
         throw error; // Re-throw to be caught by the outer try/catch
       }
     }
     
-    console.log("All workflows imported successfully");
+    console.log("All workflows imported and activated successfully");
     return true;
   } catch (error) {
     console.error('Error importing workflows:', error);

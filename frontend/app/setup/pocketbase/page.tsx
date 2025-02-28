@@ -21,6 +21,8 @@ export default function PocketbaseSetupPage() {
     pocketbaseSuperuserPassword,
     unipileDsn,
     setPocketbaseSetupComplete,
+    pocketbaseSetupComplete,
+    currentStep,
     pocketbaseServiceUsername,
     setPocketbaseServiceUsername,
     pocketbaseServicePassword,
@@ -36,6 +38,16 @@ export default function PocketbaseSetupPage() {
   const setupInitiatedRef = useRef(false);
   
   useEffect(() => {
+    // If we're on a step after PocketBase setup OR PocketBase setup is marked complete in context
+    if (currentStep > 2 && pocketbaseSetupComplete) {
+      setupCompletedRef.current = true;
+      setStatus('success');
+      setTablesStatus('success');
+      setServiceAccountStatus('success');
+      setMessageIngressStatus('success');
+      return;
+    }
+    
     // Add !setupCompletedRef.current check
     if (
       status === 'idle' && 
@@ -48,11 +60,22 @@ export default function PocketbaseSetupPage() {
       setupInitiatedRef.current = true;
       handleSetup();
     }
-  }, [n8nApiKey, pocketbaseSuperuserEmail, pocketbaseSuperuserPassword, status]);
+  }, [currentStep, pocketbaseSetupComplete, n8nApiKey, pocketbaseSuperuserEmail, pocketbaseSuperuserPassword, status]);
   
   const handleSetup = async () => {
-    if (status === 'loading') return;
+    // Don't restart if already completed
+    if (setupCompletedRef.current) {
+      console.log('Setup already completed, not restarting');
+      return;
+    }
     
+    // Prevent multiple simultaneous setup attempts
+    if (setupInitiatedRef.current && status === 'loading') {
+      console.log('Setup already in progress, ignoring duplicate request');
+      return;
+    }
+    
+    setupInitiatedRef.current = true;
     setStatus('loading');
     setError(null);
     
@@ -111,7 +134,8 @@ export default function PocketbaseSetupPage() {
         unipileCredentialId,
         serviceUsername,
         servicePassword,
-        setError
+        setError,
+        unipileDsn
       );
       await new Promise(resolve => setTimeout(resolve, 500));
       setMessageIngressStatus(messageIngressResult ? 'success' : 'error');
@@ -123,38 +147,32 @@ export default function PocketbaseSetupPage() {
       // All steps completed successfully
       setStatus('success');
       setupCompletedRef.current = true;
+      
+      // Mark PocketBase setup as complete in context
       setPocketbaseSetupComplete(true);
       
-      // Show success toast
       toast({
-        title: "Setup complete",
-        description: "PocketBase has been successfully configured.",
+        title: "PocketBase setup complete",
+        description: "Your PocketBase instance has been successfully configured.",
       });
-      
-      // Navigate to the next step
-      router.push('/setup/review');
     } catch (error) {
       console.error('Setup error:', error);
       setStatus('error');
-      if (error instanceof Error) {
-        setError(error.message);
-      } else {
-        setError('An unknown error occurred during setup');
-      }
+      setError(error instanceof Error ? error.message : 'An unknown error occurred during setup');
     }
   };
   
   const handleRetry = () => {
-    // Reset the setup initiated flag to allow retry
     setupInitiatedRef.current = false;
-    setupCompletedRef.current = false;
-    setTablesStatus('idle');
-    setServiceAccountStatus('idle');
-    setMessageIngressStatus('idle');
+    setStatus('idle');
     handleSetup();
   };
   
   const handleContinue = () => {
+    // Mark setup as complete in context if not already done
+    if (!pocketbaseSetupComplete) {
+      setPocketbaseSetupComplete(true);
+    }
     router.push('/setup/review');
   };
   

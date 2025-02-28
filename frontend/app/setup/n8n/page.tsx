@@ -107,7 +107,8 @@ export default function N8nSetupPage() {
       const workflowsResult = await importWorkflows(
         n8nApiKey,
         unipileCredentialId,
-        setError
+        setError,
+        unipileDsn
       );
       await new Promise(resolve => setTimeout(resolve, 1000));
       setWorkflowsStatus(workflowsResult ? 'success' : 'error');
@@ -194,8 +195,7 @@ export default function N8nSetupPage() {
             <div className="mt-3 space-y-1">
               <p className="text-sm text-muted-foreground">1. <b>/inbox backend [linkedout]</b> workflow</p>
               <p className="text-sm text-muted-foreground">2. <b>/thread backend [linkedout]</b> workflow</p>
-              <p className="text-sm text-muted-foreground">3. <b>new message ingress [linkedout]</b> workflow</p>
-              <p className="text-sm text-muted-foreground">4. <b>Set up PocketBase [LinkedOut]</b> workflow</p>
+              <p className="text-sm text-muted-foreground">4. <b>/setup backend [linkedout]</b> workflow</p>
             </div>
           </div>
           {renderStatusIcon(workflowsStatus)}
