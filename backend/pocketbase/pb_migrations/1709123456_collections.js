@@ -1,14 +1,14 @@
 migrate((app) => {
-    // Step 1: Create collections without relations
+    // Step 1: Create base collections first
     const snapshot = [
         {
             "id": "pbc_725385852",
+            "name": "inboxes",
             "listRule": "",
             "viewRule": "",
             "createRule": "@request.auth.id != \"\"",
             "updateRule": "@request.auth.id != \"\"",
             "deleteRule": "@request.auth.id != \"\"",
-            "name": "inboxes",
             "type": "base",
             "fields": [
                 {
@@ -124,12 +124,12 @@ migrate((app) => {
         },
         {
             "id": "pbc_520427368",
+            "name": "people",
             "listRule": "@request.auth.id != \"\"",
             "viewRule": "@request.auth.id != \"\"",
             "createRule": "@request.auth.id != \"\"",
             "updateRule": "@request.auth.id != \"\"",
             "deleteRule": null,
-            "name": "people",
             "type": "base",
             "fields": [
                 {
@@ -234,12 +234,12 @@ migrate((app) => {
         },
         {
             "id": "pbc_321265102",
+            "name": "textSnippets",
             "listRule": null,
             "viewRule": null,
             "createRule": null,
             "updateRule": null,
             "deleteRule": null,
-            "name": "textSnippets",
             "type": "base",
             "fields": [
                 {
@@ -310,47 +310,36 @@ migrate((app) => {
         }
     ];
 
-    // Step 1: Create base collections
-    return new Promise((resolve, reject) => {
-        const collections = snapshot.map((item) => new Collection(item));
-        Promise.all(collections.map(collection => app.save(collection)))
-            .then(() => {
-                // Step 2: Add relations
-                try {
-                    const inboxes = app.findCollectionByNameOrId("pbc_725385852");
-                    const people = app.findCollectionByNameOrId("pbc_520427368");
-                    
-                    inboxes.schema.addField({
-                        "cascadeDelete": false,
-                        "collectionId": "pbc_520427368",
-                        "id": "relation1593854671",
-                        "name": "sender",
-                        "type": "relation"
-                    });
-
-                    people.schema.addField({
-                        "cascadeDelete": false,
-                        "collectionId": "pbc_725385852",
-                        "id": "relation1542800728",
-                        "name": "messages",
-                        "type": "relation"
-                    });
-
-                    Promise.all([
-                        app.save(inboxes),
-                        app.save(people)
-                    ]).then(resolve).catch(reject);
-                } catch (err) {
-                    reject(err);
-                }
-            })
-            .catch(reject);
-    });
-}, (app) => {
-    // Down migration
-    const snapshot = [
-        // Same collections without relations
-    ];
+    // Create collections
     const collections = snapshot.map((item) => new Collection(item));
-    return Promise.all(collections.map(collection => app.save(collection)));
+    collections.forEach(collection => app.save(collection));
+
+    // Step 2: Add relations
+    const inboxes = app.findCollectionByNameOrId("pbc_725385852");
+    inboxes.schema.addField({
+        "cascadeDelete": false,
+        "collectionId": "pbc_520427368",
+        "id": "relation1593854671",
+        "name": "sender",
+        "type": "relation"
+    });
+    app.save(inboxes);
+
+    const people = app.findCollectionByNameOrId("pbc_520427368");
+    people.schema.addField({
+        "cascadeDelete": false,
+        "collectionId": "pbc_725385852",
+        "id": "relation1542800728",
+        "name": "messages",
+        "type": "relation"
+    });
+    app.save(people);
+
+}, (app) => {
+    // Down migration - just delete everything
+    const collections = ["pbc_725385852", "pbc_520427368", "pbc_321265102"];
+    collections.forEach(id => {
+        const collection = app.findCollectionByNameOrId(id);
+        if (collection) app.delete(collection);
+    });
 }); 
