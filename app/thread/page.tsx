@@ -15,6 +15,7 @@ import {
   PopoverTrigger 
 } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Footer } from '@/components/footer';
 
 // Add the TextSnippet interface
 interface TextSnippet {
@@ -529,20 +530,26 @@ export default function ThreadPage() {
 
   if (error) {
     return (
-      <div className="container mx-auto py-6 max-w-4xl">
-        <div className="text-destructive p-4 rounded-lg border border-destructive/50">
-          {error}
+      <div className="container mx-auto py-6 max-w-4xl flex flex-col min-h-screen">
+        <div className="flex-grow">
+          <div className="text-destructive p-4 rounded-lg border border-destructive/50">
+            {error}
+          </div>
         </div>
+        <Footer />
       </div>
     );
   }
 
   if (!thread) {
     return (
-      <div className="container mx-auto py-6 max-w-4xl">
-        <div className="text-muted-foreground p-4 text-center">
-          Thread not found
+      <div className="container mx-auto py-6 max-w-4xl flex flex-col min-h-screen">
+        <div className="flex-grow">
+          <div className="text-muted-foreground p-4 text-center">
+            Thread not found
+          </div>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -551,17 +558,20 @@ export default function ThreadPage() {
 
   if (!firstMessage) {
     return (
-      <div className="container mx-auto py-6 max-w-4xl">
-        <div className="text-muted-foreground p-4 text-center">
-          No messages in thread
+      <div className="container mx-auto py-6 max-w-4xl flex flex-col min-h-screen">
+        <div className="flex-grow">
+          <div className="text-muted-foreground p-4 text-center">
+            No messages in thread
+          </div>
         </div>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto py-4 max-w-4xl flex flex-col h-[calc(100vh-48px)]">
+    <div className="min-h-screen bg-background flex flex-col">
+      <div className="container mx-auto py-4 max-w-4xl flex flex-col h-[calc(100vh-48px)] flex-grow">
         <div className="flex items-center justify-between mb-4">
           <Button
             variant="ghost"
@@ -755,6 +765,7 @@ export default function ThreadPage() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

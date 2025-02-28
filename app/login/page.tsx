@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
+import { Footer } from '@/components/footer';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -123,6 +124,7 @@ export default function LoginPage() {
           </Button>
         </form>
       </div>
+      <Footer className="absolute bottom-2" />
     </div>
   );
 } 

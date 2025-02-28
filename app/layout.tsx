@@ -4,7 +4,6 @@ import { Inter } from 'next/font/google';
 import { cn } from '@/lib/utils';
 import { AuthProvider } from '@/app/contexts/auth-context';
 import { Toaster } from '@/components/ui/toaster';
-import { Footer } from '@/components/footer';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -25,12 +24,7 @@ export default function RootLayout({
         "min-h-screen bg-background text-foreground antialiased"
       )}>
         <AuthProvider>
-          <div className="flex flex-col min-h-screen">
-            <main className="flex-1">
-              {children}
-            </main>
-            <Footer />
-          </div>
+          {children}
           <Toaster />
         </AuthProvider>
       </body>

@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { useSetup } from '@/app/contexts/setup-context';
 import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
+import { Footer } from '@/components/footer';
 
 // Progress indicator component
 function SetupProgress() {
@@ -69,12 +70,13 @@ function SetupLayoutContent({ children }: { children: React.ReactNode }) {
   }, [pathname, setCurrentStep]);
   
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto py-6 max-w-4xl">
+    <div className="min-h-screen bg-background flex flex-col">
+      <div className="container mx-auto py-6 max-w-4xl flex-grow">
         <h1 className="text-xl font-semibold mb-4">Set up LinkedOut</h1>
         {showProgressBar && <SetupProgress />}
         {children}
       </div>
+      <Footer />
     </div>
   );
 }

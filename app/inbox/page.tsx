@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from '@/app/contexts/auth-context';
 import { formatDistanceToNow } from "date-fns";
 import Image from 'next/image';
+import { Footer } from "@/components/footer";
 
 interface Message {
   id: string;
@@ -185,13 +186,14 @@ export default function InboxPage() {
         <div className="text-destructive p-4 border border-destructive/50 rounded-lg">
           {error}
         </div>
+        <Footer className="mt-4" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto py-6 max-w-4xl">
+    <div className="min-h-screen bg-background flex flex-col">
+      <div className="container mx-auto py-6 max-w-4xl flex-grow">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-2">
             <Image 
@@ -243,6 +245,7 @@ export default function InboxPage() {
           <EmptyState />
         )}
       </div>
+      <Footer />
     </div>
   );
 }

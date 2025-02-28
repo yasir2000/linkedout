@@ -37,14 +37,15 @@ LinkedOut was built to help manage hectic LinkedIn inboxes on mobile and desktop
 ### Backend
 - **Database & Auth:** PocketBase
 - **Workflows as Backend:** n8n via webhook endpoints, and n8n api for /setup
+- **LinkedIn API Access:** Unipile
 
 ## Prerequisites
 
 - Node.js 18+ 
 - npm or yarn
 - PocketBase instance
-- n8n instance for automation workflows
-- A Unipile account for LinkedIn API access
+- n8n instance for automation workflows. Get 50% off [n8n cloud](https://app.n8n.cloud/register?utm_campaign=linkedout) for 12 months with MAX50. Enter coupon after free trial when choosing a plan.
+- A [Unipile account for](https://www.unipile.com/linkedin-api-a-comprehensive-guide-to-integration/?utm_source=youtube&utm_campaign=MAXFROMN8N) LinkedIn API access. Get 50% off Unipile for 3 months with MAXFROMN8N code (message support with code after sign up)
 
 ## Installation
 
@@ -73,7 +74,7 @@ LinkedOut was built to help manage hectic LinkedIn inboxes on mobile and desktop
    - Deploy [n8n.io](https://n8n.io) using your preferred method (n8n.cloud, docker, etc.)
    - Note your n8n URL and create an API key in the n8n settings (not available on cloud trial, self-host or upgrade)
    - You'll need this API key during the setup process
-   Get 50% off n8n cloud for 12 months with MAX50. Enter coupon after free trial when choosing a plan.
+   Get 50% off [n8n cloud](https://app.n8n.cloud/register?utm_campaign=linkedout) for 12 months with MAX50. Enter coupon after free trial when choosing a plan.
 
 4. **Set up Unipile:**
    - Create a Unipile account at [unipile.com](https://unipile.com)
