@@ -128,7 +128,7 @@
       },
       {
         "parameters": {
-          "url": "=****UNIPILE_DSN_URL****/api/v1/users/{{ $('Webhook').item.json.body.sender.attendee_provider_id }}",
+          "url": "=****UNIPILE_DSN_URL****/api/v1/users/{{ $('Webhook').item.json.body.attendees[0].attendee_provider_id }}",
           "authentication": "genericCredentialType",
           "genericAuthType": "httpHeaderAuth",
           "sendQuery": true,
