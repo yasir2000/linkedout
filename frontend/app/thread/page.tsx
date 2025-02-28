@@ -57,14 +57,13 @@ async function generateDraft(
   token: string
 ): Promise<{ draftReply: string }> {
   try {
-    const response = await fetch('/api/proxy', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL}/linkedout/generate-draft`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
-        'x-endpoint': 'linkedout/generate-draft'
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
     });
     
     const result = await response.json();
@@ -318,7 +317,7 @@ export default function ThreadPage() {
   const fetchThread = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL}/webhook/threads?id=${threadId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL}/threads?id=${threadId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -427,7 +426,7 @@ export default function ThreadPage() {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
-          'x-endpoint': 'linkout_messages'
+          'x-endpoint': 'messages',
         },
         body: JSON.stringify({
           content: reply,

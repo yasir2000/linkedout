@@ -51,10 +51,11 @@ function MessageGroup({ message }: { message: Message }) {
             onError={(e) => {
               e.currentTarget.onerror = null;
               e.currentTarget.style.display = 'none';
-              const fallbackDiv = document.createElement('div');
-              fallbackDiv.className = 'w-14 h-14 rounded-full flex items-center justify-center text-xl font-medium border-2 bg-background text-foreground border-border';
-              fallbackDiv.textContent = initial;
-              e.currentTarget.parentElement?.replaceChildren(fallbackDiv);
+              e.currentTarget.parentElement!.innerHTML = `
+                <div class="w-14 h-14 rounded-full flex items-center justify-center text-xl font-medium border-2 bg-background text-foreground border-border">
+                  ${initial}
+                </div>
+              `;
             }}
           />
         ) : (
@@ -103,11 +104,10 @@ export default function InboxPage() {
 
     try {
       const response = await fetch('/api/proxy?endpoint=linkout_messages', {
-        method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       });
       
       if (response.status === 401) {
@@ -121,25 +121,16 @@ export default function InboxPage() {
 
       const data = await response.json();
       
-      // Handle empty or null response
-      if (!data) {
-        setMessages([]);
-        setIsLoading(false);
-        return;
-      }
-      
-      const sortedMessages = (Array.isArray(data) ? data : [])
-        .filter((msg: Message) => msg?.content !== null)
+      const sortedMessages = data
+        .filter((msg: Message) => msg.content !== null)
         .sort((a: Message, b: Message) => 
           new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
         );
 
       setMessages(sortedMessages);
-      setError(null);
       setIsLoading(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch messages');
-      setIsLoading(false);
     }
   };
 
