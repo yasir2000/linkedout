@@ -10,6 +10,7 @@ import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { addUnipileCredential } from './add-unipile-credential'; // Changed from create-unipile-credential
 import { importWorkflows } from './import-workflows';
 import { SetupStatus } from './types';
+import Image from 'next/image';
 
 
 export default function N8nSetupPage() {
@@ -176,11 +177,21 @@ export default function N8nSetupPage() {
   
   return (
     <div className="border border-border rounded-lg p-8 bg-background">
-      <h1 className="text-2xl font-bold mb-4">Setting up n8n</h1>
-      
-      <p className="text-muted-foreground mb-12">
-        We're configuring your n8n instance with the necessary workflows and credentials.
-      </p>
+      <div className="flex justify-between items-start mb-6">
+        <div>
+          <h1 className="text-2xl font-bold mb-4">Setting up n8n</h1>
+          <p className="text-muted-foreground">
+            We're configuring your n8n instance with the necessary workflows and credentials.
+          </p>
+        </div>
+        <Image 
+          src="/images/logo-n8n.svg" 
+          alt="n8n Logo" 
+          width={100} 
+          height={27} 
+          className="mt-1 opacity-90"
+        />
+      </div>
       
       <div className="space-y-8 mb-12">
         <div className="flex items-center justify-between">
@@ -192,9 +203,15 @@ export default function N8nSetupPage() {
         </div>
         
         <div className="flex items-start justify-between gap-4">
-          <div className="max-w-[50%] sm:max-w-[75%] md:max-w-[60%]">
+          <div className="max-w-[60%] sm:max-w-[75%] md:max-w-[70%]">
             <h3 className="font-medium">Import modified workflows to n8n</h3>
-            <p className="text-sm text-muted-foreground">This step swaps out dynamic settings (like PocketBase base URL) then imports workflows to your n8n instance:</p>
+            <p className="text-sm text-muted-foreground">This step customizes workflows with your input and imports them into n8n
+
+
+
+
+
+</p>
             <div className="mt-3 space-y-1">
               <p className="text-sm text-muted-foreground">1. <b>/inbox backend [linkedout]</b> workflow</p>
               <p className="text-sm text-muted-foreground">2. <b>/thread backend [linkedout]</b> workflow</p>

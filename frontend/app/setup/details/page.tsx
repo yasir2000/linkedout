@@ -7,15 +7,13 @@ import { Input } from '@/components/ui/input';
 import { useSetup } from '@/app/contexts/setup-context';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
+import Image from 'next/image';
 
 // Validation schema
 const formSchema = z.object({
   n8nApiKey: z.string().min(1, "n8n API Key is required"),
-  unipileApiKey: z.string().min(1, "Unipile API Key is required"),
-  unipileDsn: z.string().min(1, "Unipile DSN is required"),
   pocketbaseSuperuserEmail: z.string().email("Invalid email address").min(1, "PocketBase Superuser Email is required"),
   pocketbaseSuperuserPassword: z.string().min(1, "PocketBase Superuser Password is required"),
-  unipileAccountId: z.string().min(1, "Unipile Account ID is required"),
 });
 
 export default function DetailsPage() {
@@ -23,21 +21,15 @@ export default function DetailsPage() {
   const { toast } = useToast();
   const { 
     n8nApiKey, setN8nApiKey,
-    unipileApiKey, setUnipileApiKey,
-    unipileDsn, setUnipileDsn,
     pocketbaseSuperuserEmail, setPocketbaseSuperuserEmail,
     pocketbaseSuperuserPassword, setPocketbaseSuperuserPassword,
-    unipileAccountId, setUnipileAccountId,
     goToNextStep
   } = useSetup();
   
   const [errors, setErrors] = useState<{
     n8nApiKey?: string;
-    unipileApiKey?: string;
-    unipileDsn?: string;
     pocketbaseSuperuserEmail?: string;
     pocketbaseSuperuserPassword?: string;
-    unipileAccountId?: string;
   }>({});
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,11 +38,8 @@ export default function DetailsPage() {
     try {
       formSchema.parse({
         n8nApiKey,
-        unipileApiKey,
-        unipileDsn,
         pocketbaseSuperuserEmail,
         pocketbaseSuperuserPassword,
-        unipileAccountId,
       });
       setErrors({});
       return true;
@@ -102,6 +91,12 @@ export default function DetailsPage() {
         API. There is no "phone home", none of your infos are sent to us 🤓
       </p>
       
+      <div className="bg-green-50/80 dark:bg-green-950/20 border border-green-200/70 dark:border-green-800/50 rounded-md p-4 mb-6">
+        <p className="text-green-700 dark:text-green-300/90 text-sm">
+          <span className="font-medium">Max's protip:</span> Use coupon code <b>MAX50</b> for 50% off a year of <a href="https://n8n.io/pricing" target="_blank" className="text-primary hover:underline">n8n cloud</a>, or alternatively <a href="https://docs.n8n.io/hosting/" target="_blank" className="text-primary hover:underline">self-host </a>.
+        </p>
+      </div>
+      
       <div className="space-y-6">
         <div>
           <label className="block text-sm font-medium mb-2">
@@ -116,63 +111,11 @@ export default function DetailsPage() {
           {errors.n8nApiKey && (
             <p className="text-sm text-destructive mt-1">{errors.n8nApiKey}</p>
           )}
+          <p className="text-xs text-muted-foreground mt-2">
+            Create an API key in <a href={`${process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL}/settings/api`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">your n8n settings</a>
+          </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-6">
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Unipile API key
-            </label>
-            <Input
-              value={unipileApiKey}
-              onChange={(e) => setUnipileApiKey(e.target.value)}
-              placeholder="e.g. eyJhbGciOiJIUzI1NiIsInR5cCI"
-              className={`w-full ${errors.unipileApiKey ? 'border-destructive' : ''}`}
-            />
-            {errors.unipileApiKey && (
-              <p className="text-sm text-destructive mt-1">{errors.unipileApiKey}</p>
-            )}
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Unipile DSN
-            </label>
-            <Input
-              value={unipileDsn}
-              onChange={(e) => setUnipileDsn(e.target.value)}
-              placeholder="e.g. api1.unipile.com:14108"
-              className={`w-full ${errors.unipileDsn ? 'border-destructive' : ''}`}
-            />
-            {errors.unipileDsn && (
-              <p className="text-sm text-destructive mt-1">{errors.unipileDsn}</p>
-            )}
-          </div>
-          
-        </div>
-        <div className="mt-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Unipile Account ID (LinkedIn)
-              </label>
-              <Input
-                value={unipileAccountId}
-                onChange={(e) => setUnipileAccountId(e.target.value)}
-                placeholder="e.g. gXVRsr0MRuqmJcLb8qcbYg"
-                className={`w-full ${errors.unipileAccountId ? 'border-destructive' : ''}`}
-              />
-              {errors.unipileAccountId && (
-                <p className="text-sm text-destructive mt-1">{errors.unipileAccountId}</p>
-              )}
-            </div>
-          </div>
-        </div>
-        <div className="mt-2">
-            <p className="text-xs text-muted-foreground">
-            ℹ️ From Unipile dashboard, first <a href="https://dashboard.unipile.com/accounts" target='_blank'>create a LinkedIn Account</a> (e.g. connect to it). Then create an <a href="https://dashboard.unipile.com/access-tokens" target='_blank'>Access Token (API Key)</a>.
-            </p>
-          </div>
         <div className="border-t pt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -189,6 +132,9 @@ export default function DetailsPage() {
               {errors.pocketbaseSuperuserEmail && (
                 <p className="text-sm text-destructive mt-1">{errors.pocketbaseSuperuserEmail}</p>
               )}
+              <p className="text-xs text-muted-foreground mt-2">
+              POCKETBASE_USER env variable set during installation
+              </p>
             </div>
             
             <div>
@@ -205,19 +151,21 @@ export default function DetailsPage() {
               {errors.pocketbaseSuperuserPassword && (
                 <p className="text-sm text-destructive mt-1">{errors.pocketbaseSuperuserPassword}</p>
               )}
+              <p className="text-xs text-muted-foreground mt-2">
+                POCKETBASE_PASSWORD env variable set during installation
+              </p>
             </div>
           </div>
         </div>
       </div>
       
       <div className="flex justify-between mt-16">
-        <Button variant="outline" onClick={() => router.push('/setup')}>
+        <Button variant="outline" onClick={() => router.push('/setup/unipile')}>
           Back
         </Button>
         <Button 
           onClick={handleContinue}
-          disabled={isSubmitting || !n8nApiKey || !unipileApiKey || !unipileDsn || 
-                   !pocketbaseSuperuserEmail || !pocketbaseSuperuserPassword || !unipileAccountId}
+          disabled={isSubmitting || !n8nApiKey || !pocketbaseSuperuserEmail || !pocketbaseSuperuserPassword}
         >
           {isSubmitting ? 'Saving...' : 'Continue'}
         </Button>

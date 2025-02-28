@@ -11,7 +11,7 @@ import { Footer } from '@/components/footer';
 // Progress indicator component
 function SetupProgress() {
   const { currentStep } = useSetup();
-  const totalSteps = 5;
+  const totalSteps = 4;
   const progress = (currentStep / totalSteps) * 100;
   
   return (
@@ -31,17 +31,16 @@ const pathToStep: Record<string, number> = {
   '/setup/details': 2,
   '/setup/n8n': 3,
   '/setup/pocketbase': 4,
-  '/setup/review': 5,
   '/setup/manual': 3, // Alternative to n8n
 };
 
 function getProgress(pathname: string): number {
   // Map paths to specific progress percentages
   const pathProgressMap: Record<string, number> = {
-    '/setup/details': 20,
-    '/setup/n8n': 40, 
-    '/setup/manual': 40, // Added manual path with 40% progress
-    '/setup/pocketbase': 60,
+    '/setup/details': 25,
+    '/setup/n8n': 50, 
+    '/setup/manual': 50, // Added manual path with 50% progress
+    '/setup/pocketbase': 100,
     '/setup/review': 100
   };
   

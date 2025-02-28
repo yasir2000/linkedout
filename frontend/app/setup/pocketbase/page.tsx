@@ -11,6 +11,7 @@ import { createPocketbaseTables } from './create-pocketbase-tables';
 import { createServiceAccount } from './create-service-account';
 import { createMessageIngressWorkflow } from './create-message-ingress-workflow';
 import { SetupStatus } from './types';
+import Image from 'next/image';
 
 export default function PocketbaseSetupPage() {
   const router = useRouter();
@@ -195,11 +196,21 @@ export default function PocketbaseSetupPage() {
   
   return (
     <div className="border border-border rounded-lg p-8 bg-background">
-      <h1 className="text-2xl font-bold mb-4">Setting up PocketBase</h1>
-      
-      <p className="text-muted-foreground mb-12">
-        We're configuring your PocketBase instance with the necessary tables and service account.
-      </p>
+      <div className="flex justify-between items-start mb-6">
+        <div>
+          <h1 className="text-2xl font-bold mb-4">Setting up PocketBase</h1>
+          <p className="text-muted-foreground">
+            We're configuring your PocketBase instance with the necessary tables and service account.
+          </p>
+        </div>
+        <Image 
+          src="/images/logo-pocketbase.svg" 
+          alt="PocketBase Logo" 
+          width={40} 
+          height={40} 
+          className="mt-1 opacity-90"
+        />
+      </div>
       
       <div className="space-y-8 mb-12">
         <div className="flex items-center justify-between">

@@ -2,7 +2,8 @@
 
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Github } from 'lucide-react';
+import { Github, ExternalLink } from 'lucide-react';
+import { CodeBlock } from "@/components/ui/code-block";
 
 export default function ManualSetupPage() {
   const router = useRouter();
@@ -15,47 +16,46 @@ export default function ManualSetupPage() {
     <div className="border border-border rounded-lg p-8 bg-background">
       <h1 className="text-2xl font-bold mb-4">Manual Setup Instructions</h1>
       
-      <p className="text-muted-foreground mb-6">
-        Follow these steps to set up LinkedOut manually:
-      </p>
+      <div className="bg-blue-50/80 dark:bg-blue-950/20 border border-blue-200/70 dark:border-blue-800/50 rounded-md p-4 mb-6">
+        <p className="text-blue-700 dark:text-blue-300/90 text-sm">
+          <span className="font-medium">Recommended:</span> Use the <a href="https://app.cloud-station.io/template-store/linkedout" target="_blank" rel="noopener noreferrer" className="font-bold underline">CloudStation LinkedOut Template</a> for one-click deployment of the frontend app and PocketBase with pre-configured environment variables.
+        </p>
+      </div>
       
-      <div className="space-y-8 mb-8">
+      <div className="space-y-6 mb-8">
         <div>
           <h2 className="text-xl font-semibold mb-2">1. Set up PocketBase</h2>
-          <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-            <li>Deploy a PocketBase instance (you can use <a href="https://app.cloud-station.io/template-store/pocketbase" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">CloudStation</a> or your preferred hosting)</li>
-            <li>Create a superuser account during the initial setup</li>
-            <li>Create the following collections in PocketBase:
-              <ul className="list-disc pl-6 mt-1">
-                <li><b>People</b> - to store LinkedIn contacts</li>
-                <li><b>Inboxes</b> - to store message threads</li>
-                <li><b>TextSnippets</b> - to store reusable message templates</li>
-              </ul>
+          <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
+            <li>Option 1: Deploy via <a href="https://app.cloud-station.io/template-store/pocketbase" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">CloudStation</a></li>
+            <li>Option 2: Install locally:
+              <CodeBlock 
+                code="curl -fsSL https://github.com/pocketbase/pocketbase/releases/download/v0.25.8/pocketbase_0.25.8_linux_amd64.zip -o pocketbase.zip
+unzip pocketbase.zip
+
+# Start PocketBase
+./pocketbase serve" 
+                language="bash" 
+                showLineNumbers={false} 
+              />
             </li>
-            <li>Create a service user account with appropriate permissions</li>
+            <li>Create collections: <b>People</b>, <b>Inboxes</b>, and <b>TextSnippets</b></li>
+            <li>Set up a service user account with appropriate permissions</li>
           </ul>
         </div>
         
         <div>
           <h2 className="text-xl font-semibold mb-2">2. Set up n8n</h2>
-          <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-            <li>Deploy an n8n instance (you can use <a href="https://app.n8n.cloud/" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">n8n.cloud</a> or self-host)</li>
+          <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
+            <li>Deploy n8n via <a href="https://app.n8n.cloud/register?utm_campaign=linkedout" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">n8n.cloud</a> (use code <b>MAX50</b> for 50% off for 12 months) or self-host</li>
             <li>Create a Unipile credential for LinkedIn API access</li>
-            <li>Import the following workflows:
-              <ul className="list-disc pl-6 mt-1">
-                <li><b>New message ingress [linkedout]</b> - handles incoming LinkedIn messages</li>
-                <li><b>/inbox backend [linkedout]</b> - manages the inbox functionality</li>
-                <li><b>/thread backend [linkedout]</b> - handles message threads</li>
-              </ul>
-            </li>
-            <li>Configure the workflows with your PocketBase URL and credentials</li>
+            <li>Import the core workflows: <b>message ingress</b>, <b>/inbox backend</b>, and <b>/thread backend</b></li>
           </ul>
         </div>
         
         <div>
           <h2 className="text-xl font-semibold mb-2">3. Configure Environment Variables</h2>
-          <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-            <li>Create a <code>.env.local</code> file in your project root with:
+          <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
+            <li>Set up <code>.env.local</code> with:
               <pre className="bg-muted p-2 rounded-md mt-1 overflow-x-auto">
                 <code>
 NEXT_PUBLIC_POCKETBASE_URL=your_pocketbase_url
@@ -63,31 +63,35 @@ NEXT_PUBLIC_N8N_WEBHOOK_URL=your_n8n_url
                 </code>
               </pre>
             </li>
+            <li>Note: Do not include trailing slashes in URLs</li>
           </ul>
         </div>
         
         <div>
           <h2 className="text-xl font-semibold mb-2">4. Deploy the Frontend</h2>
-          <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-            <li>Clone the LinkedOut repository</li>
-            <li>Install dependencies with <code>npm install</code></li>
-            <li>Build the application with <code>npm run build</code></li>
-            <li>Deploy to your preferred hosting service (Vercel, Netlify, etc.)</li>
+          <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
+            <li>Clone the repository, install dependencies with <code>npm install</code></li>
+            <li>Build with <code>npm run build</code> and deploy to your preferred hosting</li>
           </ul>
         </div>
       </div>
       
-      <p className="text-muted-foreground mb-6">
-        For detailed instructions, workflow templates, and schema definitions, check out the GitHub repository:
-      </p>
-      
-      <div className="flex justify-center">
+      <div className="flex flex-col sm:flex-row gap-4 mt-8">
         <Button 
-          className="w-full max-w-md py-6 text-lg gap-2"
+          className="py-5 text-lg gap-2 flex-1"
           onClick={openGithub}
         >
           <Github className="h-5 w-5" />
           View on GitHub
+        </Button>
+        
+        <Button 
+          variant="outline" 
+          className="py-5 text-lg gap-2 flex-1"
+          onClick={() => window.open('https://app.cloud-station.io/template-store/linkedout', '_blank')}
+        >
+          <ExternalLink className="h-5 w-5" />
+          Deploy with CloudStation
         </Button>
       </div>
       

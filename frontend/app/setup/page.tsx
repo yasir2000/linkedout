@@ -45,7 +45,7 @@ export default function SetupPage() {
         
         <Button 
           className="flex-1 order-2 sm:order-2"
-          onClick={() => router.push('/setup/details')}
+          onClick={() => router.push('/setup/unipile')}
         >
           I want to set up magically 🪄
         </Button>
