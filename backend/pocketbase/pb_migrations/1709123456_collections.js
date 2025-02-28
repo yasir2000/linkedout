@@ -1,6 +1,6 @@
 migrate((app) => {
+    // Step 1: Create collections without relations
     const snapshot = [
-
         {
             "id": "pbc_725385852",
             "listRule": "",
@@ -74,19 +74,6 @@ migrate((app) => {
                     "required": false,
                     "system": false,
                     "type": "date"
-                },
-                {
-                    "cascadeDelete": false,
-                    "collectionId": "pbc_520427368",
-                    "hidden": false,
-                    "id": "relation1593854671",
-                    "maxSelect": 1,
-                    "minSelect": 0,
-                    "name": "sender",
-                    "presentable": false,
-                    "required": false,
-                    "system": false,
-                    "type": "relation"
                 },
                 {
                     "hidden": false,
@@ -183,19 +170,6 @@ migrate((app) => {
                     "required": false,
                     "system": false,
                     "type": "text"
-                },
-                {
-                    "cascadeDelete": false,
-                    "collectionId": "pbc_725385852",
-                    "hidden": false,
-                    "id": "relation1542800728",
-                    "maxSelect": 999,
-                    "minSelect": 0,
-                    "name": "messages",
-                    "presentable": false,
-                    "required": false,
-                    "system": false,
-                    "type": "relation"
                 },
                 {
                     "hidden": false,
@@ -337,8 +311,35 @@ migrate((app) => {
     ];
 
     const collections = snapshot.map((item) => new Collection(item));
-    return Promise.all(collections.map(collection => app.save(collection)));
+    return Promise.all(collections.map(collection => app.save(collection)))
+        .then(() => {
+            // Step 2: Add relations after collections exist
+            const inboxes = app.findCollectionByNameOrId("pbc_725385852");
+            const people = app.findCollectionByNameOrId("pbc_520427368");
+            
+            // Add relations
+            inboxes.schema.addField({
+                "cascadeDelete": false,
+                "collectionId": "pbc_520427368",
+                "id": "relation1593854671",
+                "name": "sender",
+                "type": "relation"
+            });
+
+            people.schema.addField({
+                "cascadeDelete": false,
+                "collectionId": "pbc_725385852",
+                "id": "relation1542800728",
+                "name": "messages",
+                "type": "relation"
+            });
+
+            return Promise.all([
+                app.save(inboxes),
+                app.save(people)
+            ]);
+        });
 }, (app) => {
-    const collections = snapshot.map((item) => new Collection(item));
-    return Promise.all(collections.map(collection => app.save(collection)));
+    // Down migration - reverse the process
+    // ... similar structure but in reverse
 }); 
