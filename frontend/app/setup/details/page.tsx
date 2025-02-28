@@ -15,6 +15,7 @@ const formSchema = z.object({
   unipileDsn: z.string().min(1, "Unipile DSN is required"),
   pocketbaseSuperuserEmail: z.string().email("Invalid email address").min(1, "PocketBase Superuser Email is required"),
   pocketbaseSuperuserPassword: z.string().min(1, "PocketBase Superuser Password is required"),
+  unipileAccountId: z.string().min(1, "Unipile Account ID is required"),
 });
 
 export default function DetailsPage() {
@@ -26,6 +27,7 @@ export default function DetailsPage() {
     unipileDsn, setUnipileDsn,
     pocketbaseSuperuserEmail, setPocketbaseSuperuserEmail,
     pocketbaseSuperuserPassword, setPocketbaseSuperuserPassword,
+    unipileAccountId, setUnipileAccountId,
     goToNextStep
   } = useSetup();
   
@@ -35,6 +37,7 @@ export default function DetailsPage() {
     unipileDsn?: string;
     pocketbaseSuperuserEmail?: string;
     pocketbaseSuperuserPassword?: string;
+    unipileAccountId?: string;
   }>({});
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,7 +49,8 @@ export default function DetailsPage() {
         unipileApiKey,
         unipileDsn,
         pocketbaseSuperuserEmail,
-        pocketbaseSuperuserPassword
+        pocketbaseSuperuserPassword,
+        unipileAccountId,
       });
       setErrors({});
       return true;
@@ -144,8 +148,31 @@ export default function DetailsPage() {
               <p className="text-sm text-destructive mt-1">{errors.unipileDsn}</p>
             )}
           </div>
+          
         </div>
-        
+        <div className="mt-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Unipile Account ID (LinkedIn)
+              </label>
+              <Input
+                value={unipileAccountId}
+                onChange={(e) => setUnipileAccountId(e.target.value)}
+                placeholder="e.g. gXVRsr0MRuqmJcLb8qcbYg"
+                className={`w-full ${errors.unipileAccountId ? 'border-destructive' : ''}`}
+              />
+              {errors.unipileAccountId && (
+                <p className="text-sm text-destructive mt-1">{errors.unipileAccountId}</p>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="mt-2">
+            <p className="text-xs text-muted-foreground">
+            ℹ️ From Unipile dashboard, first <a href="https://dashboard.unipile.com/accounts" target='_blank'>create a LinkedIn Account</a> (e.g. connect to it). Then create an <a href="https://dashboard.unipile.com/access-tokens" target='_blank'>Access Token (API Key)</a>.
+            </p>
+          </div>
         <div className="border-t pt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -190,7 +217,7 @@ export default function DetailsPage() {
         <Button 
           onClick={handleContinue}
           disabled={isSubmitting || !n8nApiKey || !unipileApiKey || !unipileDsn || 
-                   !pocketbaseSuperuserEmail || !pocketbaseSuperuserPassword}
+                   !pocketbaseSuperuserEmail || !pocketbaseSuperuserPassword || !unipileAccountId}
         >
           {isSubmitting ? 'Saving...' : 'Continue'}
         </Button>

@@ -5,7 +5,8 @@ export async function importWorkflows(
   n8nApiKey: string,
   unipileCredentialId: string | null,
   setError: (error: string | null) => void,
-  unipileDsn: string | null = null // Add unipileDsn parameter with default value
+  unipileDsn: string | null = null,
+  unipileAccountId: string | null = null // Add this parameter
 ): Promise<boolean> {
   try {
     console.log("Importing workflows to n8n...");
@@ -32,11 +33,15 @@ export async function importWorkflows(
     
     console.log("Using Unipile DSN URL for replacements:", unipileDsnUrl);
     
-    // Define replacements map (easy to extend in the future)
+    // Get account ID from parameter or localStorage
+    const accountId = unipileAccountId || localStorage.getItem('unipileAccountId') || "";
+    
+    // Define replacements map with the account ID
     const replacements = {
       "****POCKETBASE_BASE_URL****": process.env.NEXT_PUBLIC_POCKETBASE_URL || "",
       "****UNIPILE_CREDENTIAL_ID****": unipileCredentialId,
       "****UNIPILE_DSN_URL****": unipileDsnUrl,
+      "****UNIPILE_ACCOUNT_ID****": accountId,
       "****POCKETBASE_SERVICE_USER_EMAIL****": process.env.POCKETBASE_SERVICE_USER_EMAIL || "",
       "****POCKETBASE_SERVICE_USER_PASSWORD****": process.env.POCKETBASE_SERVICE_USER_PASSWORD || ""
     };
@@ -46,6 +51,7 @@ export async function importWorkflows(
       "POCKETBASE_BASE_URL": process.env.NEXT_PUBLIC_POCKETBASE_URL || "",
       "UNIPILE_CREDENTIAL_ID": unipileCredentialId,
       "UNIPILE_DSN_URL": unipileDsnUrl,
+      "UNIPILE_ACCOUNT_ID": accountId,
       "POCKETBASE_SERVICE_USER_EMAIL": process.env.POCKETBASE_SERVICE_USER_EMAIL || "",
       "POCKETBASE_SERVICE_USER_PASSWORD": "***REDACTED***"
     });

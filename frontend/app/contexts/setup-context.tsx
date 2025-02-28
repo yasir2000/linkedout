@@ -15,6 +15,8 @@ interface SetupContextType {
   setPocketbaseSuperuserEmail: (value: string) => void;
   pocketbaseSuperuserPassword: string;
   setPocketbaseSuperuserPassword: (value: string) => void;
+  unipileAccountId: string;
+  setUnipileAccountId: (value: string) => void;
   
   // Step 2: n8n
   n8nSetupComplete: boolean;
@@ -49,6 +51,7 @@ export function SetupProvider({ children }: { children: ReactNode }) {
   const [unipileDsn, setUnipileDsn] = useState('');
   const [pocketbaseSuperuserEmail, setPocketbaseSuperuserEmail] = useState('');
   const [pocketbaseSuperuserPassword, setPocketbaseSuperuserPassword] = useState('');
+  const [unipileAccountId, setUnipileAccountId] = useState<string>('');
   
   // Step 2: n8n
   const [n8nSetupComplete, setN8nSetupComplete] = useState(false);
@@ -96,6 +99,8 @@ export function SetupProvider({ children }: { children: ReactNode }) {
         setPocketbaseServiceUsername,
         pocketbaseServicePassword,
         setPocketbaseServicePassword,
+        unipileAccountId,
+        setUnipileAccountId,
         currentStep,
         setCurrentStep,
         goToNextStep,
