@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Wand2, LogOut, Expand, Shrink, Clipboard } from 'lucide-react';
+import { ArrowLeft, Wand2, LogOut, Expand, Shrink, Clipboard, RefreshCw, Database } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { format, formatDistanceToNow } from 'date-fns';
@@ -509,6 +509,18 @@ export default function ThreadPage() {
     scrollToBottom();
   }, [thread?.messages]);
 
+  const handleRefresh = async () => {
+    setIsLoading(true);
+    try {
+      await fetchThread();
+    } catch (error) {
+      console.error("Error refreshing thread:", error);
+    } finally {
+      setIsLoading(false);
+    }
+    return Promise.resolve();
+  };
+
   if (!threadId) {
     router.push('/inbox');
     return null;
@@ -581,15 +593,17 @@ export default function ThreadPage() {
             <ArrowLeft className="h-4 w-4" />
             Back
           </Button>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            className="gap-2"
-            onClick={handleLogout}
-          >
-            <LogOut className="h-4 w-4" />
-            Logout
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="gap-2"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
+          </div>
         </div>
         
         <div className="border border-border rounded-lg bg-background flex flex-col flex-1 min-h-0">
@@ -627,7 +641,7 @@ export default function ThreadPage() {
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto min-h-0">
+          <div className="flex-1 overflow-y-auto min-h-0 relative">
             <div className="p-6 space-y-6">
               {thread.messages.map((message) => (
                 <MessageGroup 
@@ -636,6 +650,18 @@ export default function ThreadPage() {
                 />
               ))}
               <div ref={messagesEndRef} />
+            </div>
+            
+            {/* Refresh button positioned at bottom right, floating above content */}
+            <div className="sticky bottom-4 float-right mr-4 z-10">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleRefresh}
+                disabled={isLoading}
+              >
+                {isLoading ? 'Refreshing...' : 'Refresh'}
+              </Button>
             </div>
           </div>
         </div>
@@ -705,10 +731,21 @@ export default function ThreadPage() {
                   alignOffset={-50}
                   sideOffset={10}
                 >
-                  <div className="py-2">
-                    <h3 className="font-medium px-4 py-2 border-b">Text Snippets</h3>
+                  <div className="py-0">
+                    <div className="px-4 py-4 border-b flex justify-between items-center">
+                      <h3 className="font-medium">Text Snippets</h3>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="h-7 px-2 text-xs gap-1"
+                        onClick={() => window.open(`${process.env.NEXT_PUBLIC_POCKETBASE_URL}/_/`, '_blank')}
+                      >
+                        <Database className="h-3 w-3" />
+                        Open PocketBase
+                      </Button>
+                    </div>
                     
-                    {isLoadingSnippets ? (
+                    {isLoadingSnippets && snippets.length === 0 ? (
                       <div className="p-4 text-center">
                         <LoadingSpinner />
                       </div>
@@ -717,11 +754,22 @@ export default function ThreadPage() {
                         {snippetsError}
                       </div>
                     ) : snippets.length === 0 ? (
-                      <div className="p-4 text-center text-muted-foreground">
-                        No text snippets, set them in Pocketbase
+                      <div className="min-h-[105px] flex flex-col items-center justify-center gap-2 p-4">
+                        <p className="text-sm text-muted-foreground text-center">
+                          No text snippets available
+                        </p>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="h-7 px-2 text-xs gap-1"
+                          onClick={() => window.open(`${process.env.NEXT_PUBLIC_POCKETBASE_URL}/_/`, '_blank')}
+                        >
+                          <Database className="h-3 w-3" />
+                          Add in PocketBase
+                        </Button>
                       </div>
                     ) : (
-                      <ScrollArea className="max-h-[calc(6*42px)]">
+                      <ScrollArea className="min-h-[105px]">
                         <div className="py-1">
                           {snippets.map((snippet, index) => (
                             <button

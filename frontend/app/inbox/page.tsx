@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from "@/lib/utils";
-import { InboxIcon, LogOut, Database } from "lucide-react";
+import { InboxIcon, LogOut, Database, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -221,7 +221,9 @@ export default function InboxPage() {
               size="sm"
               onClick={handleRefresh}
               disabled={isLoading}
+              className="gap-2"
             >
+              <RefreshCw className="h-4 w-4" />
               {isLoading ? 'Refreshing...' : 'Refresh'}
             </Button>
             <Button 
