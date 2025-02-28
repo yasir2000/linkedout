@@ -69,7 +69,7 @@ Nothing here yet
 |----------|-------------|----------|
 | `NEXT_PUBLIC_N8N_WEBHOOK_URL` | N8N URL (without /webhook) | Yes |
 | `NEXT_PUBLIC_POCKETBASE_URL` | PocketBase URL | Yes |
-
+Note: do not include '/' trailing slash in URL env variables. It will break things (WIP to filter that out).
 
 ---
 
