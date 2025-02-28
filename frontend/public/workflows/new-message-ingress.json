@@ -868,7 +868,7 @@
               {
                 "id": "9daace63-48e6-4c44-894a-92feabd4868c",
                 "leftValue": "={{ $json.body.account_id }}",
-                "rightValue": "=gXVRsr0MRuqmJcLb8qcbYg",
+                "rightValue": "=****UNIPILE_ACCOUNT_ID****",
                 "operator": {
                   "type": "string",
                   "operation": "equals",
