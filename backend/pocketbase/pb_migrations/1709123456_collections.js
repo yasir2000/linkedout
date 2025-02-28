@@ -1,37 +1,18 @@
-migrate((db) => {
-  const collections = require('./pocketbase-schema.json');
-
-  // Create collections
-  collections.forEach(collection => {
-    const { id, name, type, listRule, viewRule, createRule, updateRule, deleteRule, fields, indexes } = collection;
+migrate((app) => {
+    const collections = JSON.parse(`YOUR_SCHEMA_JSON_HERE`);
     
-    const newCollection = new Collection({
-      id,
-      name, 
-      type,
-      listRule,
-      viewRule,
-      createRule,
-      updateRule,
-      deleteRule,
-      indexes
+    collections.forEach(collection => {
+        const newCollection = new Collection(collection);
+        app.save(newCollection);
     });
-
-    fields.forEach(field => {
-      newCollection.schema.addField(field);
+}, (app) => {
+    // revert
+    ["users", "inboxes", "people", "textSnippets"].forEach(name => {
+        try {
+            const collection = app.findCollectionByNameOrId(name);
+            if (collection) {
+                app.delete(collection);
+            }
+        } catch {}
     });
-
-    return db.saveCollection(newCollection);
-  });
-
-  return Promise.resolve();
-}, (db) => {
-  // Revert
-  const collections = require('./pocketbase-schema.json');
-  
-  collections.forEach(collection => {
-    db.deleteCollection(collection.name);
-  });
-  
-  return Promise.resolve();
 }); 
