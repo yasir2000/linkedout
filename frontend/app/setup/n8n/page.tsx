@@ -17,7 +17,8 @@ export default function N8nSetupPage() {
   const { toast } = useToast();
   const { 
     n8nApiKey, 
-    unipileApiKey, 
+    unipileApiKey,
+    unipileAccountId,
     unipileDsn,
     goToNextStep,
     currentStep,
@@ -88,7 +89,8 @@ export default function N8nSetupPage() {
       setUnipileCredentialStatus('loading');
       const unipileCredentialResult = await addUnipileCredential(
         n8nApiKey, 
-        unipileApiKey, 
+        unipileApiKey,
+        unipileAccountId,
         setError
       );
       // Add delay before updating status
@@ -108,7 +110,8 @@ export default function N8nSetupPage() {
         n8nApiKey,
         unipileCredentialId,
         setError,
-        unipileDsn
+        unipileDsn,
+        unipileAccountId
       );
       await new Promise(resolve => setTimeout(resolve, 1000));
       setWorkflowsStatus(workflowsResult ? 'success' : 'error');

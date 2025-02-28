@@ -7,7 +7,8 @@ export async function createMessageIngressWorkflow(
   pocketbaseServiceUsername: string,
   pocketbaseServicePassword: string,
   setError: (error: string | null) => void,
-  unipileDsn: string | null = null // Add unipileDsn parameter with default value
+  unipileDsn: string | null = null,
+  unipileAccountId: string | null = null // Add this parameter
 ): Promise<boolean> {
   try {
     console.log("Creating message ingress workflow in n8n...");
@@ -28,14 +29,17 @@ export async function createMessageIngressWorkflow(
       unipileDsnUrl = `https://${unipileDsnUrl}`;
     }
     
-    // Define replacements map with correct placeholder names
-    // Use static email value and dynamic password from service account
+    // Get account ID from parameter or localStorage
+    const accountId = unipileAccountId || localStorage.getItem('unipileAccountId') || "";
+    
+    // Define replacements map with the account ID
     const replacements = {
       "****POCKETBASE_BASE_URL****": process.env.NEXT_PUBLIC_POCKETBASE_URL || "",
       "****UNIPILE_CREDENTIAL_ID****": unipileCredentialId,
-      "****POCKETBASE_SERVICE_USER_EMAIL****": "linkedout-service-user@n8n.io", // Static value as requested
-      "****POCKETBASE_SERVICE_USER_PASSWORD****": pocketbaseServicePassword, // Dynamic password from service account
-      "****UNIPILE_DSN_URL****": unipileDsnUrl // Add this line to replace the DSN URL
+      "****POCKETBASE_SERVICE_USER_EMAIL****": "linkedout-service-user@n8n.io",
+      "****POCKETBASE_SERVICE_USER_PASSWORD****": pocketbaseServicePassword,
+      "****UNIPILE_DSN_URL****": unipileDsnUrl,
+      "****UNIPILE_ACCOUNT_ID****": accountId
     };
     
     console.log("Using replacements:", {

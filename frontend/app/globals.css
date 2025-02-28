@@ -57,3 +57,14 @@
     @apply bg-background text-foreground;
   }
 }
+
+a:not(.no-underline):not(button) {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  
+  transition: opacity 0.2s ease;
+}
+
+a:not(.no-underline):not(button):hover {
+  opacity: 0.8;
+}

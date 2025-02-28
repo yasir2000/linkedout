@@ -4,6 +4,7 @@
 export async function addUnipileCredential(
   n8nApiKey: string,
   unipileApiKey: string,
+  unipileAccountId: string,
   setError: (error: string | null) => void
 ): Promise<boolean> {
   try {
@@ -37,6 +38,7 @@ export async function addUnipileCredential(
 
     const result = await response.json();
     localStorage.setItem('unipileCredentialId', result.id);
+    localStorage.setItem('unipileAccountId', unipileAccountId);
     
     return true;
   } catch (error) {

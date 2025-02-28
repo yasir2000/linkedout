@@ -135,7 +135,8 @@ export default function PocketbaseSetupPage() {
         serviceUsername,
         servicePassword,
         setError,
-        unipileDsn
+        unipileDsn,
+        localStorage.getItem('unipileAccountId')
       );
       await new Promise(resolve => setTimeout(resolve, 500));
       setMessageIngressStatus(messageIngressResult ? 'success' : 'error');
