@@ -3,17 +3,17 @@
   <img src="assets/linkedout-hero-optimizied.png" alt="LinkedOut Preview" width="100%" />
 </div>
 
-LinkedOut was built to help manage hectic LinkedIn inboxes on mobile and desktop. It includes AI draft replies, text snippets library. Front-end built with Next.js, TypeScript, and Tailwind CSS. Backend runs on n8n and PocketBase.
+LinkedOut was built to help manage hectic LinkedIn inboxes on mobile and desktop. It includes AI draft replies and static text snippets library, making it a nimble assistant without being ChatGPT. Front-end built with Next.js, TypeScript, and Tailwind CSS. Backend runs on n8n and PocketBase. Clone it, tweak it, make it yours.
 
 
 ## Features
 
-- 🤖 AI-powered message drafts
-- 📱 Responsive design for mobile and desktop
-- 🔄 Real-time message updates with optimistic UI
-- 🎨 Beautiful UI with dark mode support
-- ⚡️ Instant message previews
-- 🔒 Secure authentication
+- AI-powered message drafts
+- Responsive design for mobile and desktop
+- Beautiful UI with dark mode support
+- Secure authentication
+- Setup wizard to deploy backend and set up database
+- Open source: Self-host it, fork it.
 
 ## Known Outscope
 - Logic breaks if you send the first message (no sendee data set in DB)
@@ -33,63 +33,80 @@ LinkedOut was built to help manage hectic LinkedIn inboxes on mobile and desktop
 
 ### Backend
 - **Database & Auth:** PocketBase
-- **Automation:** N8N for workflow automation
-- **API:** RESTful N8N endpoints
+- **Workflows as Backend:** n8n via webhook endpoints, and n8n api for /setup
 
 ## Prerequisites
 
 - Node.js 18+ 
 - npm or yarn
 - PocketBase instance
-- N8N instance for automation workflows
+- n8n instance for automation workflows
+- A Unipile account for LinkedIn API access
 
-## Getting Started
+## Installation
 
-1. **Clone the repository:**
+1. **Set up PocketBase:**
+   - **Recommended:** Use the one-click LinkedOut + PocketBase template on CloudStation: [LinkedOut Template](https://app.cloud-station.io/template-store/linkedout-pocketbase)
+   - Or deploy PocketBase separately: [PocketBase Template](https://app.cloud-station.io/template-store/pocketbase)
+   - Or run it locally:
+     ```bash
+     # Create a superuser account
+     ./pb/pocketbase superuser upsert $POCKETBASE_USER $POCKETBASE_PASSWORD
+     
+     # Start PocketBase server
+     ./pb/pocketbase serve --http=0.0.0.0:8090
+     ```
+   - Note your PocketBase URL
+ 
+2. **Clone this repository:**
+   - Skip this step if using the LinkedOut + PocketBase CloudStation template
    ```bash
    git clone https://github.com/maxt-n8n/linkedout
    cd linkedout
    ```
+   - Then run `npm install`
 
-2. **Install dependencies:**
-   ```bash
-   npm install
-   # or
-   yarn install
-   ```
+3. **Set up n8n:**
+   - Deploy [n8n.io](https://n8n.io) using your preferred method (n8n.cloud, docker, etc.)
+   - Note your n8n URL and create an API key in the n8n settings (not available on cloud trial, self-host or upgrade)
+   - You'll need this API key during the setup process
+   Get 50% off n8n cloud for 12 months with MAX50. Enter coupon after free trial when choosing a plan.
 
-3. **Environment Setup:**
-   
+4. **Set up Unipile:**
+   - Create a Unipile account at [unipile.com](https://unipile.com)
+   - Get your API key and DSN URL
+   - You'll need these during the setup process
+   Get 50% off Unipile for 3 months with coupon code #TODO:ADDCODE
+
+5. **Environment Setup:**
    Create a `.env.local` file in the root directory:
    ```env
    NEXT_PUBLIC_POCKETBASE_URL=your_pocketbase_url
    NEXT_PUBLIC_N8N_WEBHOOK_URL=your_n8n_url
    ```
 
-4. **Backend Setup:**
-   - Set up a PocketBase instance
-   - Configure N8N workflows for message automation
-   - Ensure both services are accessible to your frontend
-
-5. **Start the development server:**
+6. **Start the development server:**
    ```bash
    npm run dev
    # or
    yarn dev
    ```
 
-6. **Open [http://localhost:3000](http://localhost:3000) in your browser.**
+7. **Complete the setup process:**
+   - Open your browser and navigate to your deployed frontend URL or http://localhost:3000
+   - Sign in with your PocketBase superuser credentials
+   - You'll be redirected to the setup wizard
+   - Follow the steps to configure:
+     - Enter your n8n API key
+     - Enter your Unipile API key and DSN
+     - The wizard will automatically load n8n with backend workflows and credentials. It will also populate PocketBase with collections and a service user for backend.
 
-## Backend Setup
+8. **Start using LinkedOut:**
+   - After setup is complete, you can start using the application
+   - There is no historical syncing at this time, message will show as they come in. 
 
-### PocketBase
-1. One click deploy PocketBase [PocketBase](https://app.cloud-station.io/template-store/pocketbase)
-2. Import the schema from [docs/schemas/pocketbase-schema.json](docs/schemas/pocketbase-schema.json)
-
-### N8N
-1. Install N8N following instructions at [n8n.io](https://n8n.io)
-2. Import the provided workflow templates
-3. Configure the LinkedIn and PocketBase integrations
+## Troubleshooting
+Nothing here yet
 
 ## Environment Variables
 

@@ -6,6 +6,7 @@ import { useAuth } from '@/app/contexts/auth-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
+import Image from 'next/image';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -81,8 +82,16 @@ export default function LoginPage() {
   return (
     <div className="container max-w-md mx-auto min-h-screen flex flex-col items-center justify-center p-4">
       <div className="w-full space-y-6">
-        <div className="space-y-2 text-center">
-          <h1 className="text-3xl font-bold">Welcome back</h1>
+        <div className="space-y-4 text-center">
+          <div className="flex justify-center">
+            <Image 
+              src="/images/linkedout-logo.svg" 
+              alt="LinkedOut Logo" 
+              width={200} 
+              height={60} 
+              priority
+            />
+          </div>
           <p className="text-muted-foreground">Enter your credentials to access your account</p>
         </div>
         
