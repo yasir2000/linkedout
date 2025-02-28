@@ -40,7 +40,7 @@ export default function ReviewPage() {
                   <li><b>New message ingress [linkedout]</b></li>
                   <li><b>/inbox backend [linkedout]</b></li>
                   <li><b>/thread backend [linkedout]</b></li>
-                  <li><b>/setup/pocketbase [linkedout]</b> 👈 Can delete this if you like </li>
+                  <li><b>/setup backend [linkedout]</b> 👈 Can delete this if you like </li>
                 </ul>
               </li>
               <li>
@@ -50,8 +50,8 @@ export default function ReviewPage() {
               <li>
                 <span className="font-medium">PocketBase configuration</span>:
                 <ul className="list-disc pl-6 mt-1">
-                  <li>Service user <b>linkedout-service-user@n8n.io</b> was created (for New message ingress workflow to use)</li>
-                  <li>People, Inboxes, and TextSnippets tables were created in PocketBase</li>
+                  <li>Service user <b>linkedout-service-user@n8n.io</b> was created for <b>New message ingress workflow</b> to use</li>
+                  <li><b>People</b>, <b>Inboxes</b>, and <b>TextSnippets</b> tables were created in PocketBase</li>
                 </ul>
               </li>
             </ul>
@@ -68,7 +68,7 @@ export default function ReviewPage() {
               Create, update, and delete <b>Text Snippets</b> within PocketBase TextSnippets table directly (not yet added in-app). However, you can use text snippets you added in PocketBase whilst using LinkedOut.
             </li>
             <li>
-              Not everything is perfect. It's an MVP. Embrace your inner flowgrammer and make it better. Make it <i>yours</i>.
+              Not everything is perfect yet. We're rolling out updates based on feedback from <a  href="https://github.com/maxt-n8n/linkedout/issues" target='_blank'>GitHub issues</a>. Embrace your inner flowgrammer and make it better. Make it <i>yours</i>.
             </li>
           </ul>
         </div>
