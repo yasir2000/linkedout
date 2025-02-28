@@ -242,7 +242,7 @@ export default function ThreadPage() {
     setSnippetsError(null);
     
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL}/linkedout/snippets`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL}/webhook/linkedout/snippets`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
