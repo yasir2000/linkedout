@@ -3,7 +3,7 @@
       {
         "parameters": {
           "httpMethod": "POST",
-          "path": "832dd419-4753-4d2f-aff9-dbc165a600b0",
+          "path": "linkedout/messages",
           "options": {}
         },
         "type": "n8n-nodes-base.webhook",
@@ -14,7 +14,7 @@
         ],
         "id": "254195db-a5ee-42d3-a974-cf590985de97",
         "name": "Webhook",
-        "webhookId": "832dd419-4753-4d2f-aff9-dbc165a600b0",
+        "webhookId": "linkedout/messages",
         "notes": "## LinkedIn Message Entry Point\nReceives messages from LinkedIn via Unipile webhook.\n\nExpects payload:\n```json\n{\n  event: 'message_received',\n  account_id: string,\n  message: string,\n  chat_id: string,\n  attendees: Array<{\n    attendee_profile_url: string,\n    attendee_provider_id: string\n  }>\n}\n```"
       },
       {
@@ -128,7 +128,7 @@
       },
       {
         "parameters": {
-          "url": "=****UNIPILE_DSN_URL****/api/v1/users/{{ $('Webhook').item.json.body.sender.attendee_provider_id }}",
+          "url": "=****UNIPILE_DSN_URL****/api/v1/users/{{ $('Webhook').item.json.body.attendees[0].attendee_provider_id }}",
           "authentication": "genericCredentialType",
           "genericAuthType": "httpHeaderAuth",
           "sendQuery": true,
