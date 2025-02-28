@@ -26,12 +26,12 @@ services:
       - POCKETBASE_USER=admin@linkedout.io
       - POCKETBASE_PASSWORD=password
     command: >
-      sh -c "/pb/pocketbase superuser upsert $$POCKETBASE_USER $$POCKETBASE_PASSWORD &&
-             /pb/pocketbase migrate /pb/pb_migrations &&
+      sh -c "/pb/pocketbase superuser upsert $$POCKETBASE_USER $$POCKETBASE_PASSWORD && 
+             /pb/pocketbase migrate && 
              /pb/pocketbase serve --http=0.0.0.0:8080"
     volumes:
       - pb_data:/pb/pb_data
-      - ./backend/pb_migrations:/pb/pb_migrations
+      - ./backend/pocketbase/pb_migrations:/pb/pb_migrations
     stop_grace_period: 1m
     restart: unless-stopped
 
