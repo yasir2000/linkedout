@@ -234,8 +234,8 @@
       "name": "Send LinkedIn Message",
       "credentials": {
         "httpHeaderAuth": {
-          "id": "hl0a7pXHGrrkrfY8",
-          "name": "unipile 2"
+          "id": "****UNIPILE_CREDENTIAL_ID****",
+          "name": "Unipile [LinkedIn API]"
         }
       },
       "notes": "## Send Message to LinkedIn\nSends message via Unipile API to LinkedIn chat"

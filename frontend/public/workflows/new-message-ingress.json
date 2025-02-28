@@ -156,8 +156,8 @@
         "name": "get profile by id",
         "credentials": {
           "httpHeaderAuth": {
-            "id": "WZ1O0GSUsmXqHCio",
-            "name": "Unipile (devrel-linkedout)"
+            "id": "****UNIPILE_CREDENTIAL_ID****",
+            "name": "Unipile [LinkedIn API]"
           }
         },
         "onError": "continueRegularOutput",
