@@ -6,6 +6,8 @@ import { useAuth } from '@/app/contexts/auth-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
+import Image from 'next/image';
+import { Footer } from '@/components/footer';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -20,8 +22,18 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
+      // First, perform the normal login
       await login(email, password);
-      router.push('/inbox');
+      
+      // Then check if setup is complete by looking for the service user
+      const isSetupComplete = await checkSetupComplete();
+      
+      // Redirect based on setup status
+      if (isSetupComplete) {
+        router.push('/inbox');
+      } else {
+        router.push('/setup');
+      }
     } catch (error) {
       toast({
         title: 'Error',
@@ -32,12 +44,55 @@ export default function LoginPage() {
       setIsLoading(false);
     }
   };
+  
+  // Function to check if the service user exists using direct API call
+  const checkSetupComplete = async (): Promise<boolean> => {
+    try {
+      const pocketbaseUrl = process.env.NEXT_PUBLIC_POCKETBASE_URL;
+      const serviceUserEmail = 'linkedout-service-user@n8n.io';
+      
+      // Get the token from localStorage after login
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        console.error('No auth token found');
+        return true; // Default to inbox if we can't check
+      }
+      
+      // Use the token to check if the service user exists
+      const response = await fetch(`${pocketbaseUrl}/api/collections/users/records?filter=(email='${serviceUserEmail}')&fields=id,email`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        console.error('Failed to check for service user');
+        return true; // Default to inbox if we can't check
+      }
+      
+      const data = await response.json();
+      return data.totalItems > 0;
+    } catch (error) {
+      console.error('Error checking setup status:', error);
+      // If we can't check, assume setup is complete
+      return true;
+    }
+  };
 
   return (
     <div className="container max-w-md mx-auto min-h-screen flex flex-col items-center justify-center p-4">
       <div className="w-full space-y-6">
-        <div className="space-y-2 text-center">
-          <h1 className="text-3xl font-bold">Welcome back</h1>
+        <div className="space-y-4 text-center">
+          <div className="flex justify-center">
+            <Image 
+              src="/images/linkedout-logo.svg" 
+              alt="LinkedOut Logo" 
+              width={200} 
+              height={60} 
+              priority
+            />
+          </div>
           <p className="text-muted-foreground">Enter your credentials to access your account</p>
         </div>
         
@@ -69,6 +124,7 @@ export default function LoginPage() {
           </Button>
         </form>
       </div>
+      <Footer className="absolute bottom-2" />
     </div>
   );
 } 

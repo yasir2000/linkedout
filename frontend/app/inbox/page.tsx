@@ -1,12 +1,14 @@
 'use client';
 
 import { cn } from "@/lib/utils";
-import { InboxIcon, LogOut } from "lucide-react";
+import { InboxIcon, LogOut, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from '@/app/contexts/auth-context';
 import { formatDistanceToNow } from "date-fns";
+import Image from 'next/image';
+import { Footer } from "@/components/footer";
 
 interface Message {
   id: string;
@@ -51,11 +53,10 @@ function MessageGroup({ message }: { message: Message }) {
             onError={(e) => {
               e.currentTarget.onerror = null;
               e.currentTarget.style.display = 'none';
-              e.currentTarget.parentElement!.innerHTML = `
-                <div class="w-14 h-14 rounded-full flex items-center justify-center text-xl font-medium border-2 bg-background text-foreground border-border">
-                  ${initial}
-                </div>
-              `;
+              const fallbackDiv = document.createElement('div');
+              fallbackDiv.className = 'w-14 h-14 rounded-full flex items-center justify-center text-xl font-medium border-2 bg-background text-foreground border-border';
+              fallbackDiv.textContent = initial;
+              e.currentTarget.parentElement?.replaceChildren(fallbackDiv);
             }}
           />
         ) : (
@@ -104,10 +105,11 @@ export default function InboxPage() {
 
     try {
       const response = await fetch('/api/proxy?endpoint=linkout_messages', {
+        method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+          'Content-Type': 'application/json'
+        }
       });
       
       if (response.status === 401) {
@@ -121,16 +123,25 @@ export default function InboxPage() {
 
       const data = await response.json();
       
-      const sortedMessages = data
-        .filter((msg: Message) => msg.content !== null)
+      // Handle empty or null response
+      if (!data) {
+        setMessages([]);
+        setIsLoading(false);
+        return;
+      }
+      
+      const sortedMessages = (Array.isArray(data) ? data : [])
+        .filter((msg: Message) => msg?.content !== null)
         .sort((a: Message, b: Message) => 
           new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
         );
 
       setMessages(sortedMessages);
+      setError(null);
       setIsLoading(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch messages');
+      setIsLoading(false);
     }
   };
 
@@ -175,16 +186,36 @@ export default function InboxPage() {
         <div className="text-destructive p-4 border border-destructive/50 rounded-lg">
           {error}
         </div>
+        <Footer className="mt-4" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto py-6 max-w-4xl">
+    <div className="min-h-screen bg-background flex flex-col">
+      <div className="container mx-auto py-6 max-w-4xl flex-grow">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Messages</h1>
+          <div className="flex items-center gap-2">
+            <Image 
+              src="/images/linkedout-logo.svg" 
+              alt="LinkedOut Logo" 
+              width={120} 
+              height={36} 
+              priority
+            />
+            <div className="h-6 w-px bg-border mx-1"></div>
+            <h1 className="text-2xl font-bold">Messages</h1>
+          </div>
           <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="gap-2"
+              onClick={() => window.open(`${process.env.NEXT_PUBLIC_POCKETBASE_URL}/_/`, '_blank')}
+            >
+              <Database className="h-4 w-4" />
+              Open PocketBase
+            </Button>
             <Button 
               variant="outline" 
               size="sm"
@@ -223,6 +254,7 @@ export default function InboxPage() {
           <EmptyState />
         )}
       </div>
+      <Footer />
     </div>
   );
 }

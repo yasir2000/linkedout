@@ -56,16 +56,19 @@ export async function POST(request: Request) {
   }
 
   try {
-    const body = await request.json();
+    // Handle empty body requests
+    let body = {};
+    if (request.headers.get('content-length') !== '0') {
+      body = await request.json();
+    }
+    
     const endpoint = request.headers.get('x-endpoint');
 
-    // Remove endpoint validation for now
-    // const endpointResult = endpointSchema.safeParse(endpoint);
-    // if (!endpointResult.success) {
-    //   return NextResponse.json({ error: 'Invalid endpoint' }, { status: 400 });
-    // }
+    if (!endpoint) {
+      return NextResponse.json({ error: 'Missing endpoint' }, { status: 400 });
+    }
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL}/${endpoint}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL}/webhook/${endpoint}`, {
       method: 'POST',
       headers: {
         'Authorization': token,
@@ -115,7 +118,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL}/${endpoint}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL}/webhook/${endpoint}`, {
       headers: {
         'Authorization': token,
         'Content-Type': 'application/json',
@@ -132,4 +135,4 @@ export async function GET(request: Request) {
       { status: 500 }
     );
   }
-} 
+}
