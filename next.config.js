@@ -12,6 +12,7 @@ const nextConfig = {
       getDomain(process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL)
     ].filter(Boolean)
   },
+  output: 'standalone',
 };
 
 module.exports = nextConfig;
