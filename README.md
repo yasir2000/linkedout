@@ -20,7 +20,9 @@ LinkedOut was built to help manage hectic LinkedIn inboxes on mobile and desktop
 - Emoji reactions will not show
 - Group threads do not show (only Classic LinkedIN inbox, no Sales navigator either). Should be easy to tweak.
 - Draft reply only takes previous message (and name) as context. 
-- Text Snippets can be Created/ Updated / Deleted via PocketBase, not yet in-app. 
+- Text Snippets can be Created/ Updated / Deleted via PocketBase, not yet in-app.
+- Manual setup route not documented yet (working on it)
+- Setup flow does not configure AI model nodes in n8n workflow (WIP)
 
 ## Tech Stack
 <div align="center">
