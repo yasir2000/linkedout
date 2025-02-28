@@ -1,4 +1,4 @@
-# LinkedOut - AI-Powered LinkedIn Inbox
+# LinkedOut - AI-Powered LinkedIn Inbox 
 <div align="center">
   <img src="assets/linkedout-hero-optimizied.png" alt="LinkedOut Preview" width="100%" />
 </div>
