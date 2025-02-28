@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from "@/lib/utils";
-import { InboxIcon, LogOut } from "lucide-react";
+import { InboxIcon, LogOut, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -207,6 +207,15 @@ export default function InboxPage() {
             <h1 className="text-2xl font-bold">Messages</h1>
           </div>
           <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="gap-2"
+              onClick={() => window.open(`${process.env.NEXT_PUBLIC_POCKETBASE_URL}/_/`, '_blank')}
+            >
+              <Database className="h-4 w-4" />
+              Open PocketBase
+            </Button>
             <Button 
               variant="outline" 
               size="sm"
