@@ -117,6 +117,16 @@ migrate((app) => {
                     "presentable": false,
                     "system": false,
                     "type": "autodate"
+                },
+                {
+                    "cascadeDelete": false,
+                    "collectionId": "pbc_520427368",
+                    "id": "relation1593854671",
+                    "name": "sender",
+                    "type": "relation",
+                    "required": false,
+                    "presentable": false,
+                    "system": false
                 }
             ],
             "indexes": [],
@@ -227,6 +237,16 @@ migrate((app) => {
                     "presentable": false,
                     "system": false,
                     "type": "autodate"
+                },
+                {
+                    "cascadeDelete": false,
+                    "collectionId": "pbc_725385852",
+                    "id": "relation1542800728",
+                    "name": "messages",
+                    "type": "relation",
+                    "required": false,
+                    "presentable": false,
+                    "system": false
                 }
             ],
             "indexes": [],
@@ -313,27 +333,6 @@ migrate((app) => {
     // Create collections
     const collections = snapshot.map((item) => new Collection(item));
     collections.forEach(collection => app.save(collection));
-
-    // Step 2: Add relations
-    const inboxes = app.findCollectionByNameOrId("pbc_725385852");
-    inboxes.schema.addField({
-        "cascadeDelete": false,
-        "collectionId": "pbc_520427368",
-        "id": "relation1593854671",
-        "name": "sender",
-        "type": "relation"
-    });
-    app.save(inboxes);
-
-    const people = app.findCollectionByNameOrId("pbc_520427368");
-    people.schema.addField({
-        "cascadeDelete": false,
-        "collectionId": "pbc_725385852",
-        "id": "relation1542800728",
-        "name": "messages",
-        "type": "relation"
-    });
-    app.save(people);
 
 }, (app) => {
     // Down migration - just delete everything
