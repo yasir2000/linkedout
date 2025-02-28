@@ -1,4 +1,4 @@
-migrate((db) => {
+migrate((app) => {
     const snapshot = [
         {
           "id": "pbc_3142635823",
@@ -1110,8 +1110,8 @@ migrate((db) => {
       ];
 
     const collections = snapshot.map((item) => new Collection(item));
-    return db.dao.importCollections(collections, true);
-}, (db) => {
+    return app.dao.importCollections(collections, true);
+}, (app) => {
     const snapshot = [
         {
           "id": "pbc_3142635823",
@@ -2223,5 +2223,5 @@ migrate((db) => {
       ];
 
     const collections = snapshot.map((item) => new Collection(item));
-    return db.dao.importCollections(collections, true);
+    return app.dao.importCollections(collections, true);
 }); 
