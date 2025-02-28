@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000"
+    environment:
+      - NEXT_PUBLIC_POCKETBASE_URL=http://localhost:8081
+      - NEXT_PUBLIC_N8N_WEBHOOK_URL=http://n8n:5679
+    depends_on:
+      - pocketbase
+      - n8n
+    stop_grace_period: 1m
+    restart: unless-stopped
+
+  pocketbase:
+    build:
+      context: ./backend/pocketbase
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8080"
+    environment:
+      - POCKETBASE_USER=admin@linkedout.io
+      - POCKETBASE_PASSWORD=password
+    command: >
+      sh -c "/pb/pocketbase superuser upsert $$POCKETBASE_USER $$POCKETBASE_PASSWORD &&
+             /pb/pocketbase migrate /pb/pb_migrations &&
+             /pb/pocketbase serve --http=0.0.0.0:8080"
+    volumes:
+      - pb_data:/pb/pb_data
+      - ./backend/pb_migrations:/pb/pb_migrations
+    stop_grace_period: 1m
+    restart: unless-stopped
+
+  n8n:
+    image: n8nio/n8n
+    ports:
+      - "5679:5678"
+    environment:
+      - N8N_HOST=n8n
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+    volumes:
+      - n8n_data:/home/node/.n8n
+    stop_grace_period: 1m
+    restart: unless-stopped
+
+volumes:
+  pb_data:
+  n8n_data: 
