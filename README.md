@@ -23,6 +23,9 @@ LinkedOut was built to help manage hectic LinkedIn inboxes on mobile and desktop
 - Text Snippets can be Created/ Updated / Deleted via PocketBase, not yet in-app. 
 
 ## Tech Stack
+<div align="center">
+  <img src="assets/linkedout-arch-optimized.png" alt="LinkedOut Preview" width="100%" />
+</div>
 
 ### Frontend
 - **Framework:** Next.js  (App Router)

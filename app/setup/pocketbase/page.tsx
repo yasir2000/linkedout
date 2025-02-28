@@ -9,47 +9,33 @@ import { useToast } from '@/hooks/use-toast';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { createPocketbaseTables } from './create-pocketbase-tables';
 import { createServiceAccount } from './create-service-account';
+import { createMessageIngressWorkflow } from './create-message-ingress-workflow';
 import { SetupStatus } from './types';
 
 export default function PocketbaseSetupPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { 
-    n8nApiKey, 
-    unipileApiKey,
-    unipileDsn,
+  const {
+    n8nApiKey,
     pocketbaseSuperuserEmail,
     pocketbaseSuperuserPassword,
-    setPocketbaseServiceUsername,
-    setPocketbaseServicePassword,
+    unipileDsn,
     setPocketbaseSetupComplete,
-    goToNextStep,
-    currentStep,
-    pocketbaseSetupComplete
+    pocketbaseServiceUsername,
+    setPocketbaseServiceUsername,
+    pocketbaseServicePassword,
+    setPocketbaseServicePassword,
   } = useSetup();
   
   const [status, setStatus] = useState<SetupStatus>('idle');
-  const [error, setError] = useState<string | null>(null);
-  
-  // Setup steps
   const [tablesStatus, setTablesStatus] = useState<SetupStatus>('idle');
   const [serviceAccountStatus, setServiceAccountStatus] = useState<SetupStatus>('idle');
-  
-  // Add a ref to track if setup has been initiated
-  const setupInitiatedRef = useRef(false);
-  // Add a ref to track if setup has been completed
+  const [messageIngressStatus, setMessageIngressStatus] = useState<SetupStatus>('idle');
+  const [error, setError] = useState<string | null>(null);
   const setupCompletedRef = useRef(false);
+  const setupInitiatedRef = useRef(false);
   
   useEffect(() => {
-    // If we're on a step after PocketBase setup AND pocketbase setup is marked complete in context
-    if (currentStep > 2 && pocketbaseSetupComplete) {
-      setupCompletedRef.current = true;
-      setStatus('success');
-      setTablesStatus('success');
-      setServiceAccountStatus('success');
-      return;
-    }
-    
     // Add !setupCompletedRef.current check
     if (
       status === 'idle' && 
@@ -62,27 +48,10 @@ export default function PocketbaseSetupPage() {
       setupInitiatedRef.current = true;
       handleSetup();
     }
-  }, [currentStep, pocketbaseSetupComplete]);
+  }, [n8nApiKey, pocketbaseSuperuserEmail, pocketbaseSuperuserPassword, status]);
   
   const handleSetup = async () => {
-    // Don't restart if already completed
-    if (setupCompletedRef.current) {
-      console.log('Setup already completed, not restarting');
-      return;
-    }
-    
-    // Prevent multiple simultaneous setup attempts
-    if (setupInitiatedRef.current && status === 'loading') {
-      console.log('Setup already in progress, ignoring duplicate request');
-      return;
-    }
-    
-    setupInitiatedRef.current = true;
-    
-    if (!n8nApiKey || !pocketbaseSuperuserEmail || !pocketbaseSuperuserPassword) {
-      router.push('/setup/details');
-      return;
-    }
+    if (status === 'loading') return;
     
     setStatus('loading');
     setError(null);
@@ -104,7 +73,7 @@ export default function PocketbaseSetupPage() {
         throw new Error('Failed to create tables in PocketBase');
       }
       
-      // Step 2: Create service account in PocketBase and message ingress workflow in n8n
+      // Step 2: Create service account in PocketBase
       setServiceAccountStatus('loading');
       let serviceUsername = '';
       let servicePassword = '';
@@ -132,7 +101,23 @@ export default function PocketbaseSetupPage() {
       setServiceAccountStatus(serviceAccountResult ? 'success' : 'error');
       
       if (!serviceAccountResult) {
-        throw new Error('Failed to create service account in PocketBase and message ingress workflow in n8n');
+        throw new Error('Failed to create service account in PocketBase');
+      }
+      
+      // Step 3: Create message ingress workflow in n8n
+      setMessageIngressStatus('loading');
+      const messageIngressResult = await createMessageIngressWorkflow(
+        n8nApiKey,
+        unipileCredentialId,
+        serviceUsername,
+        servicePassword,
+        setError
+      );
+      await new Promise(resolve => setTimeout(resolve, 500));
+      setMessageIngressStatus(messageIngressResult ? 'success' : 'error');
+      
+      if (!messageIngressResult) {
+        throw new Error('Failed to create message ingress workflow in n8n');
       }
       
       // All steps completed successfully
@@ -140,23 +125,22 @@ export default function PocketbaseSetupPage() {
       setupCompletedRef.current = true;
       setPocketbaseSetupComplete(true);
       
+      // Show success toast
       toast({
-        title: "PocketBase setup complete",
-        description: "Your PocketBase instance has been configured successfully.",
+        title: "Setup complete",
+        description: "PocketBase has been successfully configured.",
       });
       
-      // Only update the step counter, but don't navigate automatically
-      goToNextStep();
-      
-    } catch (err) {
+      // Navigate to the next step
+      router.push('/setup/review');
+    } catch (error) {
+      console.error('Setup error:', error);
       setStatus('error');
-      setError(err instanceof Error ? err.message : 'An unknown error occurred');
-      
-      toast({
-        title: "Setup failed",
-        description: err instanceof Error ? err.message : "Failed to set up PocketBase",
-        variant: "destructive",
-      });
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError('An unknown error occurred during setup');
+      }
     }
   };
   
@@ -166,6 +150,7 @@ export default function PocketbaseSetupPage() {
     setupCompletedRef.current = false;
     setTablesStatus('idle');
     setServiceAccountStatus('idle');
+    setMessageIngressStatus('idle');
     handleSetup();
   };
   
@@ -201,17 +186,25 @@ export default function PocketbaseSetupPage() {
         <div className="flex items-center justify-between">
           <div>
             <h3 className="font-medium">Create tables in PocketBase</h3>
-            <p className="text-sm text-muted-foreground">Setting up collections for users, messages, and inboxes</p>
+            <p className="text-sm text-muted-foreground">This creates the necessary tables for LinkedOut in your PocketBase instance</p>
           </div>
           {renderStatusIcon(tablesStatus)}
         </div>
         
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-medium">Create service account and message ingress workflow</h3>
-            <p className="text-sm text-muted-foreground">Creating a service account for n8n and setting up the workflow to handle new LinkedIn messages</p>
+            <h3 className="font-medium">Create service account in PocketBase</h3>
+            <p className="text-sm text-muted-foreground">This creates a service account for the n8n workflows to use</p>
           </div>
           {renderStatusIcon(serviceAccountStatus)}
+        </div>
+        
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-medium">Create message ingress workflow in n8n</h3>
+            <p className="text-sm text-muted-foreground">This creates the workflow that handles incoming LinkedIn messages</p>
+          </div>
+          {renderStatusIcon(messageIngressStatus)}
         </div>
       </div>
       

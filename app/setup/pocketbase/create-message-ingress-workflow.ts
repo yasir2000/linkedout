@@ -29,64 +29,57 @@ export async function createMessageIngressWorkflow(
       "****POCKETBASE_SERVICE_PASSWORD****": pocketbaseServicePassword
     };
     
-    // Placeholder: simulate API call with a delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Fetch the workflow template
+    const response = await fetch(`/workflows/${workflow.filename}.json`);
+    if (!response.ok) {
+      throw new Error(`Failed to load workflow file: ${workflow.filename}.json`);
+    }
     
-    // In the real implementation, this would:
-    // 1. Fetch the workflow template
-    // 2. Replace placeholders
-    // 3. Import to n8n
+    let workflowData = await response.json();
     
-    // const response = await fetch(`/workflows/${workflow.filename}.json`);
-    // if (!response.ok) {
-    //   throw new Error(`Failed to load workflow file: ${workflow.filename}.json`);
-    // }
+    // Convert workflow to string for replacements
+    let workflowStr = JSON.stringify(workflowData);
     
-    // let workflowData = await response.json();
+    // Apply all replacements
+    for (const [placeholder, value] of Object.entries(replacements)) {
+      workflowStr = workflowStr.split(placeholder).join(value);
+    }
     
-    // // Convert workflow to string for replacements
-    // let workflowStr = JSON.stringify(workflowData);
+    // Parse back to object
+    workflowData = JSON.parse(workflowStr);
     
-    // // Apply all replacements
-    // for (const [placeholder, value] of Object.entries(replacements)) {
-    //   workflowStr = workflowStr.split(placeholder).join(value);
-    // }
+    // Create a clean workflow object
+    const cleanWorkflow = {
+      name: workflow.name,
+      nodes: workflowData.nodes || [],
+      connections: workflowData.connections || {},
+      settings: {
+        saveExecutionProgress: true,
+        saveManualExecutions: true,
+        saveDataErrorExecution: "all",
+        saveDataSuccessExecution: "all",
+        executionTimeout: 3600,
+        timezone: "UTC"
+      }
+    };
     
-    // // Parse back to object
-    // workflowData = JSON.parse(workflowStr);
-    
-    // // Create a clean workflow object
-    // const cleanWorkflow = {
-    //   name: workflow.name,
-    //   nodes: workflowData.nodes || [],
-    //   connections: workflowData.connections || {},
-    //   settings: {
-    //     saveExecutionProgress: true,
-    //     saveManualExecutions: true,
-    //     saveDataErrorExecution: "all",
-    //     saveDataSuccessExecution: "all",
-    //     executionTimeout: 3600,
-    //     timezone: "UTC"
-    //   }
-    // };
-    
-    // // Import the workflow
-    // const importResponse = await fetch('/api/setup', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     'x-service': 'n8n',
-    //     'x-endpoint': 'api/v1/workflows',
-    //     'x-n8n-api-key': n8nApiKey
-    //   },
-    //   body: JSON.stringify(cleanWorkflow),
-    // });
+    // Import the workflow
+    const importResponse = await fetch('/api/setup', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-service': 'n8n',
+        'x-endpoint': 'api/v1/workflows',
+        'x-n8n-api-key': n8nApiKey
+      },
+      body: JSON.stringify(cleanWorkflow),
+    });
 
-    // if (!importResponse.ok) {
-    //   const errorData = await importResponse.json().catch(() => ({}));
-    //   console.error(`Failed to import workflow ${workflow.name}:`, errorData);
-    //   throw new Error(errorData.message || `Failed to import workflow: ${workflow.name}`);
-    // }
+    if (!importResponse.ok) {
+      const errorData = await importResponse.json().catch(() => ({}));
+      console.error(`Failed to import workflow ${workflow.name}:`, errorData);
+      throw new Error(errorData.message || `Failed to import workflow: ${workflow.name}`);
+    }
 
     console.log("Successfully created message ingress workflow in n8n");
     return true;

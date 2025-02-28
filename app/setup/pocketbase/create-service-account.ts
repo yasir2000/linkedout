@@ -16,7 +16,7 @@ export async function createServiceAccount(
   setCredentials: (credentials: ServiceAccountCredentials) => void
 ): Promise<boolean> {
   try {
-    console.log("Creating service account in PocketBase and message ingress workflow in n8n...");
+    console.log("Creating service account in PocketBase...");
     
     // First, authenticate with PocketBase to get a valid token
     const pocketbaseUrl = process.env.NEXT_PUBLIC_POCKETBASE_URL;
@@ -78,7 +78,7 @@ export async function createServiceAccount(
     }
     
     // Call the n8n webhook through our API proxy instead of directly
-    console.log("Calling n8n webhook to create service account and message ingress workflow...");
+    console.log("Calling n8n webhook to create service account...");
     
     try {
       const webhookResponse = await fetch('/api/setup', {
@@ -91,9 +91,7 @@ export async function createServiceAccount(
           'x-pocketbase-token': authToken
         },
         body: JSON.stringify({
-          pocketbaseUrl: process.env.NEXT_PUBLIC_POCKETBASE_URL,
-          unipileCredentialId: unipileCredentialId || "",
-          unipileDsn: unipileDsn || ""
+          pocketbaseUrl: process.env.NEXT_PUBLIC_POCKETBASE_URL
         })
       });
       
@@ -163,12 +161,6 @@ export async function createServiceAccount(
         throw new Error("Service password not found in response");
       }
       
-      if (result.workflowCreated) {
-        console.log("Message ingress workflow created successfully");
-      } else {
-        console.warn("Warning: workflowCreated flag not found in webhook response");
-      }
-      
       // Extract credentials from response using the correct field names
       const credentials: ServiceAccountCredentials = {
         PocketBaseServiceUsername: result.serviceUsername,
@@ -184,7 +176,7 @@ export async function createServiceAccount(
       setCredentials(credentials);
       console.log("Credentials stored successfully");
       
-      console.log("Successfully created service account in PocketBase and message ingress workflow in n8n");
+      console.log("Successfully created service account in PocketBase");
       return true;
     } catch (error: any) {
       console.error("Error calling webhook:", error);
@@ -192,13 +184,13 @@ export async function createServiceAccount(
       return false;
     }
   } catch (error) {
-    console.error('Error creating PocketBase service account and message ingress workflow:', error);
+    console.error('Error creating PocketBase service account:', error);
     
     // Only set a generic error if no specific error has been set yet
     if (error instanceof Error && !error.message.includes('Failed to create service account in PocketBase')) {
       setError(error.message);
     } else if (!(error instanceof Error)) {
-      setError('Failed to create service account in PocketBase and message ingress workflow in n8n');
+      setError('Failed to create service account in PocketBase');
     }
     
     return false;

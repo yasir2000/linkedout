@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from '@/app/contexts/auth-context';
 import { formatDistanceToNow } from "date-fns";
+import Image from 'next/image';
 
 interface Message {
   id: string;
@@ -192,7 +193,17 @@ export default function InboxPage() {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto py-6 max-w-4xl">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Messages</h1>
+          <div className="flex items-center gap-2">
+            <Image 
+              src="/images/linkedout-logo.svg" 
+              alt="LinkedOut Logo" 
+              width={120} 
+              height={36} 
+              priority
+            />
+            <div className="h-6 w-px bg-border mx-1"></div>
+            <h1 className="text-2xl font-bold">Messages</h1>
+          </div>
           <div className="flex gap-2">
             <Button 
               variant="outline" 
