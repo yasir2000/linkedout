@@ -310,36 +310,47 @@ migrate((app) => {
         }
     ];
 
-    const collections = snapshot.map((item) => new Collection(item));
-    return Promise.all(collections.map(collection => app.save(collection)))
-        .then(() => {
-            // Step 2: Add relations after collections exist
-            const inboxes = app.findCollectionByNameOrId("pbc_725385852");
-            const people = app.findCollectionByNameOrId("pbc_520427368");
-            
-            // Add relations
-            inboxes.schema.addField({
-                "cascadeDelete": false,
-                "collectionId": "pbc_520427368",
-                "id": "relation1593854671",
-                "name": "sender",
-                "type": "relation"
-            });
+    // Step 1: Create base collections
+    return new Promise((resolve, reject) => {
+        const collections = snapshot.map((item) => new Collection(item));
+        Promise.all(collections.map(collection => app.save(collection)))
+            .then(() => {
+                // Step 2: Add relations
+                try {
+                    const inboxes = app.findCollectionByNameOrId("pbc_725385852");
+                    const people = app.findCollectionByNameOrId("pbc_520427368");
+                    
+                    inboxes.schema.addField({
+                        "cascadeDelete": false,
+                        "collectionId": "pbc_520427368",
+                        "id": "relation1593854671",
+                        "name": "sender",
+                        "type": "relation"
+                    });
 
-            people.schema.addField({
-                "cascadeDelete": false,
-                "collectionId": "pbc_725385852",
-                "id": "relation1542800728",
-                "name": "messages",
-                "type": "relation"
-            });
+                    people.schema.addField({
+                        "cascadeDelete": false,
+                        "collectionId": "pbc_725385852",
+                        "id": "relation1542800728",
+                        "name": "messages",
+                        "type": "relation"
+                    });
 
-            return Promise.all([
-                app.save(inboxes),
-                app.save(people)
-            ]);
-        });
+                    Promise.all([
+                        app.save(inboxes),
+                        app.save(people)
+                    ]).then(resolve).catch(reject);
+                } catch (err) {
+                    reject(err);
+                }
+            })
+            .catch(reject);
+    });
 }, (app) => {
-    // Down migration - reverse the process
-    // ... similar structure but in reverse
+    // Down migration
+    const snapshot = [
+        // Same collections without relations
+    ];
+    const collections = snapshot.map((item) => new Collection(item));
+    return Promise.all(collections.map(collection => app.save(collection)));
 }); 
