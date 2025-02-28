@@ -1109,16 +1109,9 @@ migrate((app) => {
         }
       ];
 
-    const collections = snapshot.map((item) => {
-        const collection = new Collection(item);
-        return app.save(collection);
-    });
-    return Promise.all(collections);
+    const collections = snapshot.map((item) => new Collection(item));
+    return app.collections.import(collections);
 }, (app) => {
-    // Down migration - revert changes
-    const collections = snapshot.map((item) => {
-        const collection = new Collection(item);
-        return app.save(collection);
-    });
-    return Promise.all(collections);
+    const collections = snapshot.map((item) => new Collection(item));
+    return app.collections.import(collections);
 }); 
