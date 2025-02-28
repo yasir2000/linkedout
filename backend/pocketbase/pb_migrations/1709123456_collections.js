@@ -1110,9 +1110,8 @@ migrate((db) => {
       ];
 
     const collections = snapshot.map((item) => new Collection(item));
-    return Dao(db).importCollections(collections, true);
+    return db.dao.importCollections(collections, true);
 }, (db) => {
-    // Down migration - use the same schema
     const snapshot = [
         {
           "id": "pbc_3142635823",
@@ -2224,5 +2223,5 @@ migrate((db) => {
       ];
 
     const collections = snapshot.map((item) => new Collection(item));
-    return Dao(db).importCollections(collections, true);
+    return db.dao.importCollections(collections, true);
 }); 
