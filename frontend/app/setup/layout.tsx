@@ -7,6 +7,7 @@ import { useSetup } from '@/app/contexts/setup-context';
 import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 import { Footer } from '@/components/footer';
+import Image from 'next/image';
 
 // Progress indicator component
 function SetupProgress() {
@@ -71,7 +72,16 @@ function SetupLayoutContent({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <div className="container mx-auto py-6 max-w-4xl flex-grow">
-        <h1 className="text-xl font-semibold mb-4">Set up LinkedOut</h1>
+        <div className="flex items-center gap-2 mb-4">
+          <Image 
+            src="/images/linkedout-logo.svg" 
+            alt="LinkedOut Logo" 
+            width={120} 
+            height={24} 
+            priority
+          />
+          <span className="text-xl font-semibold">Setup</span>
+        </div>
         {showProgressBar && <SetupProgress />}
         {children}
       </div>

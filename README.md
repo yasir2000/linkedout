@@ -58,10 +58,41 @@ LinkedOut was built to help manage hectic LinkedIn inboxes on mobile and desktop
 4. Open your n8n workflows and replace any AI model steps with your own (not yet part of setup flow). 
 
 ### Via Manual Deployment
-WIP
+1. **Set up n8n**
+   - Create a **Unipile [LinkedIn API]** Header credential with your Unipile API key
+   - Import the following workflows from the GitHub repository:
+     - `/inbox backend [linkedout]`
+     - `/thread backend [linkedout]`
+     - `New message ingress [linkedout]`
+     - `/setup backend [linkedout]` (optional)
+   - Update all placeholder values in the workflows:
+     - `****POCKETBASE_BASE_URL****`: Your PocketBase URL
+     - `****POCKETBASE_SERVICE_USER_EMAIL****`: Service account email
+     - `****POCKETBASE_SERVICE_USER_PASSWORD****`: Service account password
+     - `****UNIPILE_ACCOUNT_ID****`: Your Unipile account ID
+     - `****UNIPILE_DSN****`: Your Unipile DSN
 
-## Troubleshooting
-Nothing here yet
+2. **Set up PocketBase**
+   - Create the following collections:
+     - `users` (with auth enabled)
+     - `threads`
+     - `messages`
+     - `text_snippets`
+   - Create a service account with email `linkedout-service@example.com` (or update workflows with your preferred email)
+   - Set a secure password for the service account (and update workflows accordingly)
+
+3. **Deploy the Frontend**
+   - Clone the repository: `git clone https://github.com/maxt-n8n/linkedout.git`
+   - Install dependencies: `npm install` or `yarn install`
+   - Set environment variables:
+     - `NEXT_PUBLIC_POCKETBASE_URL`: Your PocketBase URL
+     - `NEXT_PUBLIC_N8N_WEBHOOK_URL`: Your n8n webhook URL
+   - Build and start the application:
+     - Development: `npm run dev` or `yarn dev`
+     - Production: `npm run build && npm start` or `yarn build && yarn start`
+
+Note: Do not include trailing slashes in URL environment variables.
+
 
 ## Environment Variables
 
@@ -70,6 +101,9 @@ Nothing here yet
 | `NEXT_PUBLIC_N8N_WEBHOOK_URL` | N8N URL (without /webhook) | Yes |
 | `NEXT_PUBLIC_POCKETBASE_URL` | PocketBase URL | Yes |
 Note: do not include '/' trailing slash in URL env variables. It will break things (WIP to filter that out).
+
+## Contributing
+Post an issue to discuss merging in a change. We'll open it up for more streamlined contributions if there's interest. 
 
 ---
 
