@@ -1,22 +1,17 @@
 FROM alpine:latest
 
-ARG PB_VERSION=0.25.8
-
+# Install required dependencies
 RUN apk add --no-cache \
+    ca-certificates \
     unzip \
-    ca-certificates
+    wget
 
-# download and unzip PocketBase
-ADD https://github.com/pocketbase/pocketbase/releases/download/v${PB_VERSION}/pocketbase_${PB_VERSION}_linux_amd64.zip /tmp/pb.zip
-RUN unzip /tmp/pb.zip -d /pb/
-
-# uncomment to copy the local pb_migrations dir into the image
-# COPY ./pb_migrations /pb/pb_migrations
-
-# uncomment to copy the local pb_hooks dir into the image
-# COPY ./pb_hooks /pb/pb_hooks
+# Download and install PocketBase
+RUN wget https://github.com/pocketbase/pocketbase/releases/download/v0.21.3/pocketbase_0.21.3_linux_amd64.zip \
+    && unzip pocketbase_0.21.3_linux_amd64.zip \
+    && rm pocketbase_0.21.3_linux_amd64.zip \
+    && chmod +x /pocketbase
 
 EXPOSE 8080
 
-# start PocketBase
-CMD ["/pb/pocketbase", "serve", "--http=0.0.0.0:8080"]
+CMD ["/pocketbase", "serve", "--http=0.0.0.0:8080"]
