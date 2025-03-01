@@ -196,6 +196,31 @@ export default function UnipileSetupPage() {
             </p>
           </div>
         </div>
+        
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="font-medium">4. Set up a webhook for incoming messages</h3>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => window.open('https://dashboard.unipile.com/webhooks?new=1', '_blank')}
+            >
+              Open Webhooks<ExternalLink className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground mb-2">
+              Create a webhook in Unipile to receive new LinkedIn messages in real-time.
+            </p>
+            <ol className="list-decimal ml-5 text-sm text-muted-foreground space-y-1">
+              <li>Go to the Unipile Webhooks page</li>
+              <li>Create a new "Messaging" webhook for "On new message" event</li>
+              <li>Set the callback URL to: <code className="bg-muted px-1 py-0.5 rounded text-xs">{process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL || 'https://your-n8n-instance'}/webhook/linkedout/messages</code></li>
+              <li>Save the webhook configuration</li>
+            </ol>
+          </div>
+        </div>
+
       </div>
       
       <div className="flex justify-between mt-8">

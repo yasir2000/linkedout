@@ -43,37 +43,37 @@ function MessageGroup({ message }: { message: Message }) {
   const date = message.lastUpdated ? new Date(message.lastUpdated) : new Date();
 
   return (
-    <div className="flex gap-6">
+    <div className="flex gap-3 sm:gap-6">
       <div className="flex-shrink-0">
         {message.avatar ? (
           <img 
             src={message.avatar || ''}
             alt={message.author}
-            className="w-14 h-14 rounded-full border-2 border-border object-cover"
+            className="w-10 h-10 sm:w-14 sm:h-14 rounded-full border-2 border-border object-cover"
             onError={(e) => {
               e.currentTarget.onerror = null;
               e.currentTarget.style.display = 'none';
               const fallbackDiv = document.createElement('div');
-              fallbackDiv.className = 'w-14 h-14 rounded-full flex items-center justify-center text-xl font-medium border-2 bg-background text-foreground border-border';
+              fallbackDiv.className = 'w-10 h-10 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-base sm:text-xl font-medium border-2 bg-background text-foreground border-border';
               fallbackDiv.textContent = initial;
               e.currentTarget.parentElement?.replaceChildren(fallbackDiv);
             }}
           />
         ) : (
-          <div className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-medium border-2 bg-background text-foreground border-border">
+          <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-base sm:text-xl font-medium border-2 bg-background text-foreground border-border">
             {initial}
           </div>
         )}
       </div>
-      <div className="flex-grow min-w-0 flex items-start justify-between gap-4">
+      <div className="flex-grow min-w-0 flex items-start justify-between gap-2 sm:gap-4">
         <div className="min-w-0 flex-grow">
-          <div className="flex items-center gap-2">
-            <h2 className="font-semibold text-lg truncate">{message.author}</h2>
-            <span className="text-sm text-muted-foreground">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+            <h2 className="font-semibold text-base sm:text-lg truncate">{message.author}</h2>
+            <span className="text-xs sm:text-sm text-muted-foreground">
               {formatDistanceToNow(date, { addSuffix: true })}
             </span>
           </div>
-          <p className="text-base text-muted-foreground line-clamp-1">
+          <p className="text-sm sm:text-base text-muted-foreground line-clamp-1">
             {message.content}
           </p>
         </div>
@@ -193,47 +193,48 @@ export default function InboxPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <div className="container mx-auto py-6 max-w-4xl flex-grow">
-        <div className="flex justify-between items-center mb-6">
+      <div className="container mx-auto py-2 sm:py-6 max-w-4xl flex-grow px-2 sm:px-4">
+        <div className="flex justify-between items-center mb-4 sm:mb-6">
           <div className="flex items-center gap-2">
             <Image 
               src="/images/linkedout-logo.svg" 
               alt="LinkedOut Logo" 
-              width={120} 
-              height={36} 
+              width={136} 
+              height={40} 
+              className="sm:w-[136px] sm:h-[40px]"
               priority
             />
-            <div className="h-6 w-px bg-border mx-1"></div>
-            <h1 className="text-2xl font-bold">Messages</h1>
+            
+            
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-1 sm:gap-2">
             <Button 
               variant="outline" 
               size="sm"
-              className="gap-2"
+              className="gap-1 sm:gap-2 px-2 sm:px-3"
               onClick={() => window.open(`${process.env.NEXT_PUBLIC_POCKETBASE_URL}/_/`, '_blank')}
             >
               <Database className="h-4 w-4" />
-              Open PocketBase
+              <span className="hidden sm:inline">Open PocketBase</span>
             </Button>
             <Button 
               variant="outline" 
               size="sm"
               onClick={handleRefresh}
               disabled={isLoading}
-              className="gap-2"
+              className="gap-1 sm:gap-2 px-2 sm:px-3"
             >
               <RefreshCw className="h-4 w-4" />
-              {isLoading ? 'Refreshing...' : 'Refresh'}
+              <span className="hidden sm:inline">{isLoading ? 'Refreshing...' : 'Refresh'}</span>
             </Button>
             <Button 
               variant="ghost" 
               size="sm"
-              className="gap-2"
+              className="gap-1 sm:gap-2 px-2 sm:px-3"
               onClick={handleLogout}
             >
               <LogOut className="h-4 w-4" />
-              Logout
+              <span className="hidden sm:inline">Logout</span>
             </Button>
           </div>
         </div>
@@ -244,7 +245,7 @@ export default function InboxPage() {
                 key={message.id}
                 onClick={() => handleMessageClick(message.id)}
                 className={cn(
-                  "p-4 hover:bg-muted/10 transition-colors cursor-pointer",
+                  "p-3 sm:p-4 hover:bg-muted/10 transition-colors cursor-pointer",
                   "flex items-start gap-4"
                 )}
               >
