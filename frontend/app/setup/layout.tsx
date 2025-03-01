@@ -7,11 +7,12 @@ import { useSetup } from '@/app/contexts/setup-context';
 import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 import { Footer } from '@/components/footer';
+import Image from 'next/image';
 
 // Progress indicator component
 function SetupProgress() {
   const { currentStep } = useSetup();
-  const totalSteps = 5;
+  const totalSteps = 4;
   const progress = (currentStep / totalSteps) * 100;
   
   return (
@@ -31,17 +32,16 @@ const pathToStep: Record<string, number> = {
   '/setup/details': 2,
   '/setup/n8n': 3,
   '/setup/pocketbase': 4,
-  '/setup/review': 5,
   '/setup/manual': 3, // Alternative to n8n
 };
 
 function getProgress(pathname: string): number {
   // Map paths to specific progress percentages
   const pathProgressMap: Record<string, number> = {
-    '/setup/details': 20,
-    '/setup/n8n': 40, 
-    '/setup/manual': 40, // Added manual path with 40% progress
-    '/setup/pocketbase': 60,
+    '/setup/details': 25,
+    '/setup/n8n': 50, 
+    '/setup/manual': 50, // Added manual path with 50% progress
+    '/setup/pocketbase': 100,
     '/setup/review': 100
   };
   
@@ -72,7 +72,16 @@ function SetupLayoutContent({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <div className="container mx-auto py-6 max-w-4xl flex-grow">
-        <h1 className="text-xl font-semibold mb-4">Set up LinkedOut</h1>
+        <div className="flex items-center gap-2 mb-4">
+          <Image 
+            src="/images/linkedout-logo.svg" 
+            alt="LinkedOut Logo" 
+            width={120} 
+            height={24} 
+            priority
+          />
+          <span className="text-xl font-semibold">Setup</span>
+        </div>
         {showProgressBar && <SetupProgress />}
         {children}
       </div>

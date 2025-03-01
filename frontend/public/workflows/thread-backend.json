@@ -147,22 +147,6 @@
     },
     {
       "parameters": {
-        "path": "threads",
-        "responseMode": "responseNode",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
-      "position": [
-        -1980,
-        360
-      ],
-      "id": "cc17cfe3-8a1c-46ee-9631-d41e9b86f889",
-      "name": "Webhook",
-      "webhookId": "b9c6c08c-9036-46db-a0b5-99a75347802b"
-    },
-    {
-      "parameters": {
         "content": "## Message Thread Flow\n\nFetches and formats message threads:\n- Gets messages by sender ID\n- Expands sender details\n- Sorts by creation date\n- Formats for frontend display",
         "height": 240,
         "width": 340,
@@ -175,22 +159,6 @@
       ],
       "name": "Workflow Overview",
       "id": "c48ee63a-143e-480d-a359-9fd214fb8beb",
-      "typeVersion": 1
-    },
-    {
-      "parameters": {
-        "content": "⚠️ Required Environment Variable:\nPOCKET_BASE_URL\n\nEither replace URLs directly or inject in n8n instance",
-        "height": 120,
-        "width": 300,
-        "color": 5
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        -1780,
-        520
-      ],
-      "name": "Environment Setup",
-      "id": "681e5d0e-9ed1-4dc3-8da9-73ee7afc6117",
       "typeVersion": 1
     },
     {
@@ -234,29 +202,11 @@
       "name": "Send LinkedIn Message",
       "credentials": {
         "httpHeaderAuth": {
-          "id": "****UNIPILE_CREDENTIAL_ID****",
+          "id": "sKgvi3din06BhHoi",
           "name": "Unipile [LinkedIn API]"
         }
       },
       "notes": "## Send Message to LinkedIn\nSends message via Unipile API to LinkedIn chat"
-    },
-    {
-      "parameters": {
-        "httpMethod": "POST",
-        "path": "linkedout/message",
-        "responseMode": "responseNode",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
-      "position": [
-        -1900,
-        1040
-      ],
-      "id": "b936b17c-2996-4175-a5ed-336936fb0e6d",
-      "name": "Message Endpoint",
-      "webhookId": "a724482b-2203-4883-8fb1-fa5591741de2",
-      "notes": "## Message Send Endpoint\nReceives message send requests from frontend"
     },
     {
       "parameters": {
@@ -301,12 +251,7 @@
       ],
       "id": "d223767e-4a9a-43e0-b9bc-85bcb405f039",
       "name": "Anthropic Chat Model",
-      "credentials": {
-        "anthropicApi": {
-          "id": "VN0XNDKVfMKoscWz",
-          "name": "devrel-workspace (max@n8n)"
-        }
-      }
+      "credentials": {}
     },
     {
       "parameters": {
@@ -383,12 +328,7 @@
       ],
       "id": "9fad68d3-75a0-4311-b537-13a1d56048ad",
       "name": "Anthropic Chat Model1",
-      "credentials": {
-        "anthropicApi": {
-          "id": "VN0XNDKVfMKoscWz",
-          "name": "devrel-workspace (max@n8n)"
-        }
-      }
+      "credentials": {}
     },
     {
       "parameters": {
@@ -451,23 +391,6 @@
       "name": "Generate Draft",
       "retryOnFail": false,
       "onError": "continueErrorOutput"
-    },
-    {
-      "parameters": {
-        "httpMethod": "POST",
-        "path": "linkedout/generate-draft",
-        "responseMode": "responseNode",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
-      "position": [
-        -1960,
-        1580
-      ],
-      "id": "41a4479d-e16e-4fe4-84a5-309a76de45e9",
-      "name": "Webhook1",
-      "webhookId": "cd280d92-962d-4e63-bc5e-a34377856e24"
     },
     {
       "parameters": {
@@ -643,26 +566,11 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        580,
-        380
+        860,
+        400
       ],
       "id": "f03533d7-076b-4e70-bf54-a7d1726fceea",
       "name": "Respond Error2"
-    },
-    {
-      "parameters": {
-        "respondWith": "json",
-        "responseBody": "={\n  \"textSnippets\": {{ $json.textSnippets.toJsonString() }}\n}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.1,
-      "position": [
-        1240,
-        140
-      ],
-      "id": "e97fcdc6-cb51-4c79-ac78-e866000a14de",
-      "name": "Respond Success2"
     },
     {
       "parameters": {
@@ -672,11 +580,12 @@
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
-        560,
-        140
+        880,
+        180
       ],
       "id": "617c3977-8692-4b4c-a5de-623df0962fbc",
-      "name": "Split Out"
+      "name": "Split Out",
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -701,8 +610,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        740,
-        140
+        1080,
+        180
       ],
       "id": "a5c74ec1-6eef-4394-be52-625cfad5ff08",
       "name": "format"
@@ -716,11 +625,126 @@
       "type": "n8n-nodes-base.aggregate",
       "typeVersion": 1,
       "position": [
-        960,
-        140
+        1280,
+        180
       ],
       "id": "81309e74-f47c-4f35-a03c-4e3beb58b5fd",
       "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "05175ef0-3c88-4b0e-a932-3b16a8d7e32b",
+              "leftValue": "={{ $json.items }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        520,
+        140
+      ],
+      "id": "f005e8d5-2974-4eaa-838f-b24b0bd68a82",
+      "name": "Empty?"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"textSnippets\": []\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        860,
+        -20
+      ],
+      "id": "e2607635-aba8-4931-ac90-fe6f3ea7eb2e",
+      "name": "Respond with no snippets"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"textSnippets\": {{ $json.textSnippets.toJsonString() }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1520,
+        180
+      ],
+      "id": "e97fcdc6-cb51-4c79-ac78-e866000a14de",
+      "name": "Respond with snippets"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "linkedout/generate-draft",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1960,
+        1580
+      ],
+      "id": "41a4479d-e16e-4fe4-84a5-309a76de45e9",
+      "name": "Generate draft endpoint",
+      "webhookId": "cd280d92-962d-4e63-bc5e-a34377856e24"
+    },
+    {
+      "parameters": {
+        "path": "threads",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1980,
+        360
+      ],
+      "id": "cc17cfe3-8a1c-46ee-9631-d41e9b86f889",
+      "name": "/thread view",
+      "webhookId": "b9c6c08c-9036-46db-a0b5-99a75347802b"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "linkedout/message",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1900,
+        1040
+      ],
+      "id": "b936b17c-2996-4175-a5ed-336936fb0e6d",
+      "name": "Send Message Endpoint",
+      "webhookId": "a724482b-2203-4883-8fb1-fa5591741de2",
+      "notes": "## Message Send Endpoint\nReceives message send requests from frontend"
     }
   ],
   "connections": {
@@ -768,33 +792,11 @@
         ]
       ]
     },
-    "Webhook": {
-      "main": [
-        [
-          {
-            "node": "get users",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Send LinkedIn Message": {
       "main": [
         [
           {
             "node": "Send Response1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Message Endpoint": {
-      "main": [
-        [
-          {
-            "node": "Send LinkedIn Message",
             "type": "main",
             "index": 0
           }
@@ -888,17 +890,6 @@
         ]
       ]
     },
-    "Webhook1": {
-      "main": [
-        [
-          {
-            "node": "Text Classifier",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "POST snippet": {
       "main": [
         [
@@ -943,7 +934,7 @@
       "main": [
         [
           {
-            "node": "Split Out",
+            "node": "Empty?",
             "type": "main",
             "index": 0
           }
@@ -983,7 +974,58 @@
       "main": [
         [
           {
-            "node": "Respond Success2",
+            "node": "Respond with snippets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Empty?": {
+      "main": [
+        [
+          {
+            "node": "Respond with no snippets",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate draft endpoint": {
+      "main": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "/thread view": {
+      "main": [
+        [
+          {
+            "node": "get users",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Message Endpoint": {
+      "main": [
+        [
+          {
+            "node": "Send LinkedIn Message",
             "type": "main",
             "index": 0
           }
@@ -991,209 +1033,8 @@
       ]
     }
   },
-  "pinData": {
-    "Webhook": [
-      {
-        "headers": {
-          "host": "n8n-zjrvqodz.cloud-station.app",
-          "cf-ray": "90d413e85a836609-AMS",
-          "x-forwarded-for": "5.195.129.200, 172.71.103.157, 10.190.0.37",
-          "sec-gpc": "1",
-          "if-none-match": "W/\"1e7-M5OHNTVuillbZY1Tw/Hg+lKKq28\"",
-          "accept-encoding": "gzip, br",
-          "cf-ipcountry": "AE",
-          "accept-language": "en-US,en;q=0.9",
-          "referer": "http://65.108.214.84:3000/",
-          "cf-visitor": "{\"scheme\":\"https\"}",
-          "sec-fetch-dest": "empty",
-          "sec-fetch-mode": "cors",
-          "cf-connecting-ip": "5.195.129.200",
-          "sec-fetch-site": "cross-site",
-          "origin": "http://65.108.214.84:3000",
-          "priority": "u=1, i",
-          "cdn-loop": "cloudflare; loops=1",
-          "sec-ch-ua-platform": "\"macOS\"",
-          "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2xsZWN0aW9uSWQiOiJwYmNfMzE0MjYzNTgyMyIsImV4cCI6MTczODg0Nzc3MCwiaWQiOiJ4cjc4YnMxNDIyMHA4NTgiLCJyZWZyZXNoYWJsZSI6dHJ1ZSwidHlwZSI6ImF1dGgifQ.Lwm7Lc4MlAUx9Kz4xZjg7ZPoNqqzsdrX9M634dIpQ1w",
-          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-          "sec-ch-ua": "\"Brave\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"",
-          "content-type": "application/json",
-          "sec-ch-ua-mobile": "?0",
-          "accept": "*/*",
-          "x-forwarded-port": "443",
-          "x-forwarded-proto": "https",
-          "connection": "close"
-        },
-        "params": {},
-        "query": {
-          "id": "51if53a2x0wer7t"
-        },
-        "body": {},
-        "webhookUrl": "https://n8n-zjrvqodz.cloud-station.app/webhook/threads",
-        "executionMode": "production"
-      }
-    ],
-    "Message Endpoint": [
-      {
-        "headers": {
-          "host": "n8n-zjrvqodz.cloud-station.app",
-          "cf-ray": "90d4dbca0c72d5bd-NRT",
-          "x-forwarded-for": "5.195.129.200, 172.71.212.44, 10.190.0.37",
-          "accept": "*/*",
-          "accept-language": "en-US,en;q=0.9",
-          "accept-encoding": "gzip, br",
-          "cf-ipcountry": "AE",
-          "referer": "http://65.108.214.84:3000/",
-          "sec-fetch-dest": "empty",
-          "cf-visitor": "{\"scheme\":\"https\"}",
-          "sec-fetch-mode": "cors",
-          "sec-fetch-site": "cross-site",
-          "cf-connecting-ip": "5.195.129.200",
-          "origin": "http://65.108.214.84:3000",
-          "sec-gpc": "1",
-          "priority": "u=1, i",
-          "content-length": "241",
-          "cdn-loop": "cloudflare; loops=1",
-          "sec-ch-ua-platform": "\"macOS\"",
-          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-          "sec-ch-ua": "\"Brave\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"",
-          "content-type": "application/json",
-          "sec-ch-ua-mobile": "?0",
-          "x-forwarded-port": "443",
-          "x-forwarded-proto": "https",
-          "connection": "close"
-        },
-        "params": {},
-        "query": {},
-        "body": {
-          "message": "ths one ",
-          "threadId": "6g49br4jq9vr90v",
-          "messageId": "uz305n3x0yoqy8d",
-          "chatId": "97enS7RrWp6FrlPc51JfoA",
-          "recipientName": "Zakaria Elamdizi",
-          "linkedinProfileURL": "https://www.linkedin.com/in/ACoAAAdomtsB6v1dibbn5f-9KZKXuEgXTuW965A"
-        },
-        "webhookUrl": "https://n8n-zjrvqodz.cloud-station.app/webhook/linkedout/message",
-        "executionMode": "production"
-      }
-    ],
-    "Webhook1": [
-      {
-        "headers": {
-          "host": "devrel.app.n8n.cloud",
-          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
-          "content-length": "272",
-          "accept": "*/*",
-          "accept-encoding": "gzip, br",
-          "accept-language": "en-GB,en-US;q=0.9,en;q=0.8",
-          "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2xsZWN0aW9uSWQiOiJwYmNfMzE0MjYzNTgyMyIsImV4cCI6MTc0MDU5MzQxMCwiaWQiOiIxZWZ2M284dTJlczg4MjIiLCJyZWZyZXNoYWJsZSI6dHJ1ZSwidHlwZSI6ImF1dGgifQ.dwM5u_U_TiBOdkulAr76cLKX459WTKmNYmMYKmHL-TU",
-          "cdn-loop": "cloudflare; loops=1; subreqs=1",
-          "cf-connecting-ip": "2003:ee:5720:e900:24f4:a75d:cd98:9919",
-          "cf-ew-via": "15",
-          "cf-ipcountry": "DE",
-          "cf-ray": "917b730621eee51d-TXL",
-          "cf-visitor": "{\"scheme\":\"https\"}",
-          "cf-worker": "n8n.cloud",
-          "content-type": "application/json",
-          "origin": "https://linkedout-zowvlodz.az-csprod1.cloud-station.io",
-          "priority": "u=1, i",
-          "referer": "https://linkedout-zowvlodz.az-csprod1.cloud-station.io/",
-          "sec-ch-ua": "\"Not(A:Brand\";v=\"99\", \"Google Chrome\";v=\"133\", \"Chromium\";v=\"133\"",
-          "sec-ch-ua-mobile": "?0",
-          "sec-ch-ua-platform": "\"macOS\"",
-          "sec-fetch-dest": "empty",
-          "sec-fetch-mode": "cors",
-          "sec-fetch-site": "cross-site",
-          "x-forwarded-for": "2003:ee:5720:e900:24f4:a75d:cd98:9919, 162.158.112.143",
-          "x-forwarded-host": "devrel.app.n8n.cloud",
-          "x-forwarded-port": "443",
-          "x-forwarded-proto": "https",
-          "x-forwarded-server": "traefik-prod-users-gwc-8-86454fd949-ms967",
-          "x-is-trusted": "yes",
-          "x-real-ip": "2003:ee:5720:e900:24f4:a75d:cd98:9919"
-        },
-        "params": {},
-        "query": {},
-        "body": {
-          "toFullName": "Oumnya Benhassou",
-          "messageToReplyTo": "Here is my calendar link: https://calendly.com/max-n8n/devrel-chat?month=2024-10\r\nIf there are no convenient times, let me know your timezone and I'll try to adjust my schedule.",
-          "messageCategory": "love-your-content"
-        },
-        "webhookUrl": "https://devrel.app.n8n.cloud/webhook/linkedout/generate-draft",
-        "executionMode": "production"
-      }
-    ],
-    "POST snippet": [
-      {
-        "headers": {
-          "host": "n8n-zjrvqodz.cloud-station.app",
-          "cf-ray": "90d454aa5ca25d97-FRA",
-          "x-forwarded-for": "72.144.83.147, 172.69.150.124, 10.190.0.37",
-          "cf-connecting-ip": "72.144.83.147",
-          "content-type": "application/json",
-          "accept-encoding": "gzip, br",
-          "cf-ipcountry": "DE",
-          "accept": "application/json,text/html,application/xhtml+xml,application/xml,text/*;q=0.9, image/*;q=0.8, */*;q=0.7",
-          "cdn-loop": "cloudflare; loops=1",
-          "cf-visitor": "{\"scheme\":\"https\"}",
-          "content-length": "41",
-          "user-agent": "axios/1.7.4",
-          "x-forwarded-port": "443",
-          "x-forwarded-proto": "https",
-          "connection": "close"
-        },
-        "params": {},
-        "query": {},
-        "body": {
-          "name": "Snippet 2",
-          "text": "Lorem ipsum"
-        },
-        "webhookUrl": "https://n8n-zjrvqodz.cloud-station.app/webhook-test/linkedout/snippet",
-        "executionMode": "test"
-      }
-    ],
-    "GET many snippets": [
-      {
-        "headers": {
-          "host": "devrel.app.n8n.cloud",
-          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
-          "accept": "*/*",
-          "accept-encoding": "gzip, br",
-          "accept-language": "en-GB,en-US;q=0.9,en;q=0.8",
-          "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2xsZWN0aW9uSWQiOiJwYmNfMzE0MjYzNTgyMyIsImV4cCI6MTc0MDcyOTU1OSwiaWQiOiIxZWZ2M284dTJlczg4MjIiLCJyZWZyZXNoYWJsZSI6dHJ1ZSwidHlwZSI6ImF1dGgifQ.0QiQS2_prjYhmZ70zkA1gCrUfkP_mPCkcMTH72XzWtU",
-          "cdn-loop": "cloudflare; loops=1; subreqs=1",
-          "cf-connecting-ip": "2003:ee:5720:e900:24f4:a75d:cd98:9919",
-          "cf-ew-via": "15",
-          "cf-ipcountry": "DE",
-          "cf-ray": "9186b8eb74a5aca7-TXL",
-          "cf-visitor": "{\"scheme\":\"https\"}",
-          "cf-worker": "n8n.cloud",
-          "content-type": "application/json",
-          "origin": "https://linkedout-zowvlodz.az-csprod1.cloud-station.io",
-          "priority": "u=1, i",
-          "referer": "https://linkedout-zowvlodz.az-csprod1.cloud-station.io/",
-          "sec-ch-ua": "\"Not(A:Brand\";v=\"99\", \"Google Chrome\";v=\"133\", \"Chromium\";v=\"133\"",
-          "sec-ch-ua-mobile": "?0",
-          "sec-ch-ua-platform": "\"macOS\"",
-          "sec-fetch-dest": "empty",
-          "sec-fetch-mode": "cors",
-          "sec-fetch-site": "cross-site",
-          "x-forwarded-for": "2003:ee:5720:e900:24f4:a75d:cd98:9919, 162.158.112.142",
-          "x-forwarded-host": "devrel.app.n8n.cloud",
-          "x-forwarded-port": "443",
-          "x-forwarded-proto": "https",
-          "x-forwarded-server": "traefik-prod-users-gwc-8-86454fd949-6tq8p",
-          "x-is-trusted": "yes",
-          "x-real-ip": "2003:ee:5720:e900:24f4:a75d:cd98:9919"
-        },
-        "params": {},
-        "query": {},
-        "body": {},
-        "webhookUrl": "https://devrel.app.n8n.cloud/webhook/linkedout/snippets/",
-        "executionMode": "production"
-      }
-    ]
-  },
+  "pinData": {},
   "meta": {
-    "instanceId": "205b3bc06c96f2dc835b4f00e1cbf9a937a74eeb3b47c99d0c30b0586dbf85aa"
+    "instanceId": "b0a83d90b19dda4dfc41d62bab57390aff1b490974047290004de2aaca62c9f2"
   }
 }
