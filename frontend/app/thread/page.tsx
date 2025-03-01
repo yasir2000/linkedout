@@ -147,11 +147,11 @@ function MessageGroup({ message }: { message: Message }) {
   const date = message.lastUpdated ? new Date(message.lastUpdated) : new Date();
 
   return (
-    <div className="flex gap-4 mb-8 group relative">
+    <div className="flex gap-2 sm:gap-4 mb-4 sm:mb-8 group relative">
       <div className="flex-shrink-0">
         {isMe ? (
           <div className={cn(
-            "w-14 h-14 rounded-full flex items-center justify-center text-xl font-medium border-2",
+            "w-10 h-10 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-base sm:text-xl font-medium border-2",
             "bg-primary text-primary-foreground border-primary"
           )}>
             Me
@@ -160,12 +160,12 @@ function MessageGroup({ message }: { message: Message }) {
           <img 
             src={message.avatar || ''}
             alt={message.recipientName}
-            className="w-14 h-14 rounded-full border-2 border-border object-cover"
+            className="w-10 h-10 sm:w-14 sm:h-14 rounded-full border-2 border-border object-cover"
             onError={(e) => {
               e.currentTarget.onerror = null;
               e.currentTarget.style.display = 'none';
               e.currentTarget.parentElement!.innerHTML = `
-                <div class="w-14 h-14 rounded-full flex items-center justify-center text-xl font-medium border-2 bg-background text-foreground border-border">
+                <div class="w-10 h-10 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-base sm:text-xl font-medium border-2 bg-background text-foreground border-border">
                   ${initial}
                 </div>
               `;
@@ -173,16 +173,16 @@ function MessageGroup({ message }: { message: Message }) {
           />
         )}
       </div>
-      <div className="flex-grow space-y-1 min-w-0 pr-20">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="font-semibold text-lg truncate">
+      <div className="flex-grow space-y-1 min-w-0 pr-4 sm:pr-20">
+        <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+          <span className="font-semibold text-base sm:text-lg truncate">
             {isMe ? "You" : message.recipientName || 'Unknown'}
           </span>
-          <span className="text-sm text-muted-foreground">
+          <span className="text-xs sm:text-sm text-muted-foreground">
             {format(date, "MMM d, yyyy 'at' h:mm a")}
           </span>
         </div>
-        <div className="text-base text-muted-foreground break-words whitespace-pre-line">
+        <div className="text-sm sm:text-base text-muted-foreground break-words whitespace-pre-line">
           {formatMessage(message.content || '')}
         </div>
       </div>
@@ -582,182 +582,182 @@ export default function ThreadPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <div className="container mx-auto py-4 max-w-4xl flex flex-col h-[calc(100vh-48px)] flex-grow">
-        <div className="flex items-center justify-between mb-4">
-          <Button
-            variant="ghost"
-            className="gap-2"
-            onClick={() => router.push('/inbox')}
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back
-          </Button>
-          <div className="flex gap-2">
-            <Button 
-              variant="ghost" 
-              size="sm"
-              className="gap-2"
-              onClick={handleLogout}
-            >
-              <LogOut className="h-4 w-4" />
-              Logout
-            </Button>
-          </div>
-        </div>
-        
-        <div className="border border-border rounded-lg bg-background flex flex-col flex-1 min-h-0">
-        <div className="flex items-center justify-between p-4 border-b border-border">
-            <div className="flex items-center gap-4">
-              <img 
-                src={firstMessage.avatar || ''}
-                alt={firstMessage.recipientName}
-                className="w-16 h-16 rounded-full border-4 border-border object-cover"
-                onError={(e) => {
-                  e.currentTarget.onerror = null;
-                  e.currentTarget.style.display = 'none';
-                  e.currentTarget.parentElement!.innerHTML = `
-                    <div class="w-16 h-16 rounded-full bg-secondary flex items-center justify-center text-2xl font-medium">
-                      ${firstMessage.recipientName?.[0]?.toUpperCase()}
-                    </div>
-                  `;
-                }}
-              />
-              <div>
-                <h2 className="text-xl font-semibold">{firstMessage.recipientName || 'Unknown'}</h2>
-                <div className="text-sm text-muted-foreground flex items-center gap-2">
-                  <span>{firstMessage.recipientLinkedInFollowerCount} followers</span>
-                  {firstMessage.linkedinProfileURL && (
-                    <Button 
-                      variant="link"
-                      className="p-0 h-auto font-normal"
-                      onClick={() => handleOpenLink(firstMessage.linkedinProfileURL)}
-                    >
-                      View LinkedIn profile
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex-1 overflow-y-auto min-h-0 relative">
-            <div className="p-6 space-y-6">
-              {thread.messages.map((message) => (
-                <MessageGroup 
-                  key={message.id} 
-                  message={message} 
-                />
-              ))}
-              <div ref={messagesEndRef} />
-            </div>
-            
-            {/* Refresh button positioned at bottom right, floating above content */}
-            <div className="sticky bottom-4 float-right mr-4 z-10">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={handleRefresh}
-                disabled={isLoading}
+    <div className="h-screen bg-background flex flex-col">
+      {/* Header - full width container for buttons */}
+      <div className="w-full">
+        <div className="mx-auto max-w-[768px]">
+          <div className="flex items-center sm:px-0 py-2 sm:py-6">
+            <div className="w-full flex justify-between">
+              <Button
+                variant="ghost"
+                className="px-2 sm:px-4 gap-2"
+                onClick={() => router.push('/inbox')}
               >
-                {isLoading ? 'Refreshing...' : 'Refresh'}
+                <ArrowLeft className="h-4 w-4" />
+                <span>Back</span>
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={handleLogout}
+                className="px-2 sm:px-4 gap-2"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Logout</span>
               </Button>
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="mt-4 rounded-xl border border-border bg-background p-4">
-          <div className="flex flex-col gap-4">
-            <div className="relative flex-grow">
-              <Textarea
-                ref={textareaRef}
-                value={reply}
-                onChange={(e) => setReply(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Write your reply..."
-                className={cn(
-                  "w-full resize-none p-4 pr-28 text-base transition-all duration-200",
-                  isExpanded ? "min-h-[500px]" : "min-h-[100px]"
-                )}
-                disabled={isSending}
-              />
-              <div className="absolute top-3 right-3 flex gap-2 z-10">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsExpanded(!isExpanded)}
-                  className="text-muted-foreground hover:text-foreground hover:bg-muted/50 bg-background"
-                >
-                  {isExpanded ? (
-                    <Shrink className="h-5 w-5" />
+      {/* Main content area */}
+      <div className="flex-1 min-h-0 px-2 sm:px-4">
+        <div className="mx-auto max-w-[768px] h-full flex flex-col">
+          <div className="flex-1 border border-border rounded-lg bg-background flex flex-col min-h-0">
+            {/* Profile header */}
+            <div className="flex items-center p-2 sm:p-4 border-b border-border">
+              <div className="flex items-center gap-2 sm:gap-4">
+                <img 
+                  src={firstMessage.avatar || ''}
+                  alt={firstMessage.recipientName}
+                  className="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2 sm:border-4 border-border object-cover"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.parentElement!.innerHTML = `
+                      <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-secondary flex items-center justify-center text-xl sm:text-2xl font-medium">
+                        ${firstMessage.recipientName?.[0]?.toUpperCase()}
+                      </div>
+                    `;
+                  }}
+                />
+                <div>
+                  {firstMessage.linkedinProfileURL ? (
+                    <>
+                      <button 
+                        onClick={() => handleOpenLink(firstMessage.linkedinProfileURL)}
+                        className="sm:hidden text-lg font-semibold text-left hover:underline"
+                      >
+                        {firstMessage.recipientName || 'Unknown'}
+                      </button>
+                      <h2 className="hidden sm:block text-xl font-semibold">
+                        {firstMessage.recipientName || 'Unknown'}
+                      </h2>
+                    </>
                   ) : (
-                    <Expand className="h-5 w-5" />
+                    <h2 className="text-lg sm:text-xl font-semibold">
+                      {firstMessage.recipientName || 'Unknown'}
+                    </h2>
                   )}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleGenerateDraft}
-                  disabled={isGenerating}
-                  className="text-muted-foreground hover:text-foreground hover:bg-muted/50 bg-background"
-                >
-                  <Wand2 className="h-5 w-5 text-foreground" />
-                </Button>
+                  <div className="text-xs sm:text-sm text-muted-foreground flex items-center gap-2">
+                    <span>{firstMessage.recipientLinkedInFollowerCount} followers</span>
+                    {firstMessage.linkedinProfileURL && (
+                      <Button 
+                        variant="link"
+                        className="hidden sm:inline-flex p-0 h-auto font-normal"
+                        onClick={() => handleOpenLink(firstMessage.linkedinProfileURL)}
+                      >
+                        View LinkedIn profile
+                      </Button>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div className="flex justify-between items-center">
-              {/* Text Snippets Button and Popover - moved outside textarea */}
-              <Popover open={isSnippetsOpen} onOpenChange={setIsSnippetsOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="gap-2 text-muted-foreground hover:text-foreground"
-                    onClick={() => {
-                      if (!snippets.length && !isLoadingSnippets) {
-                        fetchTextSnippets();
-                      }
-                    }}
-                  >
-                    <Clipboard className="h-4 w-4" />
-                    Text Snippets
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent 
-                  className="w-80 p-0" 
-                  align="start"
-                  side="top"
-                  alignOffset={-50}
-                  sideOffset={10}
+            {/* Messages container with scroll */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="p-3 sm:p-6 space-y-3 sm:space-y-6">
+                {thread.messages.map((message) => (
+                  <MessageGroup 
+                    key={message.id} 
+                    message={message} 
+                  />
+                ))}
+                <div ref={messagesEndRef} />
+              </div>
+              
+              <div className="sticky bottom-2 sm:bottom-4 float-right mr-2 sm:mr-4 z-10">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleRefresh}
+                  disabled={isLoading}
                 >
-                  <div className="py-0">
-                    <div className="px-4 py-4 border-b flex justify-between items-center">
-                      <h3 className="font-medium">Text Snippets</h3>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        className="h-7 px-2 text-xs gap-1"
-                        onClick={() => window.open(`${process.env.NEXT_PUBLIC_POCKETBASE_URL}/_/`, '_blank')}
-                      >
-                        <Database className="h-3 w-3" />
-                        Open PocketBase
-                      </Button>
-                    </div>
-                    
-                    {isLoadingSnippets && snippets.length === 0 ? (
-                      <div className="p-4 text-center">
-                        <LoadingSpinner />
-                      </div>
-                    ) : snippetsError ? (
-                      <div className="p-4 text-center text-destructive">
-                        {snippetsError}
-                      </div>
-                    ) : snippets.length === 0 ? (
-                      <div className="min-h-[105px] flex flex-col items-center justify-center gap-2 p-4">
-                        <p className="text-sm text-muted-foreground text-center">
-                          No text snippets available
-                        </p>
+                  {isLoading ? 'Refreshing...' : 'Refresh'}
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Reply section */}
+          <div className="mt-2 sm:mt-4 rounded-xl border border-border bg-background p-2 sm:p-4">
+            <div className="flex flex-col gap-3 sm:gap-4">
+              <div className="relative flex-grow">
+                <Textarea
+                  ref={textareaRef}
+                  value={reply}
+                  onChange={(e) => setReply(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Write your reply..."
+                  className={cn(
+                    "w-full resize-none p-4 pr-28 text-base transition-all duration-200",
+                    isExpanded ? "min-h-[500px]" : "min-h-[100px]"
+                  )}
+                  disabled={isSending}
+                />
+                <div className="absolute top-3 right-3 flex gap-2 z-10">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    className="text-muted-foreground hover:text-foreground hover:bg-muted/50 bg-background"
+                  >
+                    {isExpanded ? (
+                      <Shrink className="h-5 w-5" />
+                    ) : (
+                      <Expand className="h-5 w-5" />
+                    )}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleGenerateDraft}
+                    disabled={isGenerating}
+                    className="text-muted-foreground hover:text-foreground hover:bg-muted/50 bg-background"
+                  >
+                    <Wand2 className="h-5 w-5 text-foreground" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center">
+                <Popover open={isSnippetsOpen} onOpenChange={setIsSnippetsOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="gap-2 px-3 sm:px-4 text-muted-foreground hover:text-foreground"
+                      onClick={() => {
+                        if (!snippets.length && !isLoadingSnippets) {
+                          fetchTextSnippets();
+                        }
+                      }}
+                    >
+                      <Clipboard className="h-4 w-4" />
+                      Text Snippets
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent 
+                    className="w-80 p-0" 
+                    align="start"
+                    side="top"
+                    alignOffset={-50}
+                    sideOffset={10}
+                  >
+                    <div className="py-0">
+                      <div className="px-4 py-4 border-b flex justify-between items-center">
+                        <h3 className="font-medium">Text Snippets</h3>
                         <Button 
                           variant="outline" 
                           size="sm"
@@ -765,50 +765,75 @@ export default function ThreadPage() {
                           onClick={() => window.open(`${process.env.NEXT_PUBLIC_POCKETBASE_URL}/_/`, '_blank')}
                         >
                           <Database className="h-3 w-3" />
-                          Add in PocketBase
+                          Open PocketBase
                         </Button>
                       </div>
-                    ) : (
-                      <ScrollArea className="min-h-[105px]">
-                        <div className="py-1">
-                          {snippets.map((snippet, index) => (
-                            <button
-                              key={index}
-                              className="w-full text-left px-4 py-2 text-sm hover:bg-muted/50 focus:bg-muted/50 focus:outline-none truncate"
-                              onClick={() => insertSnippet(snippet.value)}
-                            >
-                              {snippet.name}
-                            </button>
-                          ))}
+                      
+                      {isLoadingSnippets && snippets.length === 0 ? (
+                        <div className="p-4 text-center">
+                          <LoadingSpinner />
                         </div>
-                      </ScrollArea>
-                    )}
-                  </div>
-                </PopoverContent>
-              </Popover>
+                      ) : snippetsError ? (
+                        <div className="p-4 text-center text-destructive">
+                          {snippetsError}
+                        </div>
+                      ) : snippets.length === 0 ? (
+                        <div className="min-h-[105px] flex flex-col items-center justify-center gap-2 p-4">
+                          <p className="text-sm text-muted-foreground text-center">
+                            No text snippets available
+                          </p>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="h-7 px-2 text-xs gap-1"
+                            onClick={() => window.open(`${process.env.NEXT_PUBLIC_POCKETBASE_URL}/_/`, '_blank')}
+                          >
+                            <Database className="h-3 w-3" />
+                            Add in PocketBase
+                          </Button>
+                        </div>
+                      ) : (
+                        <ScrollArea className="min-h-[105px]">
+                          <div className="py-1">
+                            {snippets.map((snippet, index) => (
+                              <button
+                                key={index}
+                                className="w-full text-left px-4 py-2 text-sm hover:bg-muted/50 focus:bg-muted/50 focus:outline-none truncate"
+                                onClick={() => insertSnippet(snippet.value)}
+                              >
+                                {snippet.name}
+                              </button>
+                            ))}
+                          </div>
+                        </ScrollArea>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
 
-              <Button 
-                size="lg"
-                className="px-4 gap-2"
-                disabled={!reply.trim() || isSending}
-                onClick={handleSend}
-              >
-                Send
-                <svg 
-                  viewBox="0 0 24 24" 
-                  className="h-5 w-5" 
-                  fill="none" 
-                  xmlns="http://www.w3.org/2000/svg"
+                <Button 
+                  size="lg"
+                  className="px-3 sm:px-4 gap-2"
+                  disabled={!reply.trim() || isSending}
+                  onClick={handleSend}
                 >
-                  <path 
-                    d="M5 12H19M19 12L13 6M19 12L13 18" 
-                    stroke="currentColor" 
-                    strokeWidth="2" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </Button>
+                  Send
+                  <svg 
+                    viewBox="0 0 24 24" 
+                    className="h-5 w-5" 
+                    fill="none" 
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path 
+                      d="M5 12H19M19 12L13 6M19 12L13 18" 
+                      stroke="currentColor" 
+                      strokeWidth="2" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </Button>
+              </div>
             </div>
           </div>
         </div>
