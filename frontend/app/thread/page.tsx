@@ -814,7 +814,7 @@ export default function ThreadPage() {
                 <Button 
                   size="lg"
                   className="px-3 sm:px-4 gap-2"
-                  disabled={!reply.trim() || isSending}
+                  disabled={!reply?.trim() || isSending}
                   onClick={handleSend}
                 >
                   Send
